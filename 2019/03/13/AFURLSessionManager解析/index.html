@@ -5,13 +5,13 @@
   
 
   
-  <title>AFNetwoking之AFURLSessionManager(二) | Hexo</title>
+  <title>AFNetwoking之AFURLSessionManager(二) | iOS知识积累</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="AFURLSessionManager解析问题一 : 为何用C静态函数实现:          (1)GCD只执行一次，url_session_manager_creation_queue用于创建一个串行队列来执行各种网络请求任务的创建工作?          (2)url_session_manager_create_task_safely(dispatch_block_t _Nonnull b">
 <meta property="og:type" content="article">
 <meta property="og:title" content="AFNetwoking之AFURLSessionManager(二)">
 <meta property="og:url" content="http://yoursite.com/2019/03/13/AFURLSessionManager解析/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="iOS知识积累">
 <meta property="og:description" content="AFURLSessionManager解析问题一 : 为何用C静态函数实现:          (1)GCD只执行一次，url_session_manager_creation_queue用于创建一个串行队列来执行各种网络请求任务的创建工作?          (2)url_session_manager_create_task_safely(dispatch_block_t _Nonnull b">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/737950-d866c9c4ada203d8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
@@ -22,7 +22,7 @@
 <meta name="twitter:description" content="AFURLSessionManager解析问题一 : 为何用C静态函数实现:          (1)GCD只执行一次，url_session_manager_creation_queue用于创建一个串行队列来执行各种网络请求任务的创建工作?          (2)url_session_manager_create_task_safely(dispatch_block_t _Nonnull b">
 <meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/737950-d866c9c4ada203d8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
   
-    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+    <link rel="alternate" href="/atom.xml" title="iOS知识积累" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -41,8 +41,12 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/" id="logo">Hexo</a>
+        <a href="/" id="logo">iOS知识积累</a>
       </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">马努吉诺比利</a>
+        </h2>
       
     </div>
     <div id="header-inner" class="inner">
@@ -1461,7 +1465,7 @@ return NSURLSessionTaskStateCanceling;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/03/13/AFURLSessionManager解析/" data-id="cjurrl6450006ub96tzjjp4wg" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/03/13/AFURLSessionManager解析/" data-id="cjurrnwjw0006uy965hhpbg1u" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1550,7 +1554,7 @@ return NSURLSessionTaskStateCanceling;
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2019 John Doe<br>
+      &copy; 2019 彭章博<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>

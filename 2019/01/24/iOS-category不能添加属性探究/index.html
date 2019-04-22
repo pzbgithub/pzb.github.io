@@ -5,13 +5,13 @@
   
 
   
-  <title>iOS category不能添加属性探究 | Hexo</title>
+  <title>iOS category不能添加属性探究 | iOS知识积累</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="既然要探究的是分类，那么我们先看一下分类的定义:  再看下Class的定义:  对比结果： 对比可以发现category中少了 struct objc_ivar_list * _Nullable ivars也就是说没有ivar数组，猜测这是原因，下面来做实验。 举例： 声明一个Dog类：   打印结果：name的属性，系统默认生成的_name的实例变量，还有getter setter方法。  加上">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS category不能添加属性探究">
 <meta property="og:url" content="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="iOS知识积累">
 <meta property="og:description" content="既然要探究的是分类，那么我们先看一下分类的定义:  再看下Class的定义:  对比结果： 对比可以发现category中少了 struct objc_ivar_list * _Nullable ivars也就是说没有ivar数组，猜测这是原因，下面来做实验。 举例： 声明一个Dog类：   打印结果：name的属性，系统默认生成的_name的实例变量，还有getter setter方法。  加上">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_8fbb59c10fdccb4a84cde7b124d06093.png">
@@ -29,7 +29,7 @@
 <meta name="twitter:description" content="既然要探究的是分类，那么我们先看一下分类的定义:  再看下Class的定义:  对比结果： 对比可以发现category中少了 struct objc_ivar_list * _Nullable ivars也就是说没有ivar数组，猜测这是原因，下面来做实验。 举例： 声明一个Dog类：   打印结果：name的属性，系统默认生成的_name的实例变量，还有getter setter方法。  加上">
 <meta name="twitter:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_8fbb59c10fdccb4a84cde7b124d06093.png">
   
-    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+    <link rel="alternate" href="/atom.xml" title="iOS知识积累" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -48,8 +48,12 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/" id="logo">Hexo</a>
+        <a href="/" id="logo">iOS知识积累</a>
       </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">马努吉诺比利</a>
+        </h2>
       
     </div>
     <div id="header-inner" class="inner">
@@ -124,7 +128,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/" data-id="cjurrl63c0000ub96sxjxn2yh" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/" data-id="cjurrnwj40000uy964oas4fts" class="article-share-link">Share</a>
       
       
     </footer>
@@ -213,7 +217,7 @@
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2019 John Doe<br>
+      &copy; 2019 彭章博<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
