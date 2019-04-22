@@ -66,258 +66,6 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-指针与结构体" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2019/04/18/指针与结构体/" class="article-date">
-  <time datetime="2019-04-18T06:14:54.396Z" itemprop="datePublished">2019-04-18</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="1-指针"><a href="#1-指针" class="headerlink" title="1.指针"></a>1.指针</h2><pre><code>1.1 栗子:
-    {
-        int a = 100, b = 10;
-        int *pointer_1, *pointer_2;
-        pointer_1 = &amp;a;
-        pointer_2 = &amp;b;
-        printf(&quot;a=%d,b=%d\n&quot;,a, b);
-        printf(&quot;*pointer_1=%d, *pointer_2=%d&quot;, *pointer_1, *pointer_2);
-    }
-
-1.2 怎样定义指针变量?
-
-    类型名 * 指针变量名;
-    如: int *pointer_1;
-
-说明:指针变量是基本数据类型派生出来的类型，它不能离开基本类型而独立存在.
-
-    (1)指针变量前面的&quot;*&quot;表示该变量的类型为指针型变量。指针变量名是pointer_1,而不是
-       *pointer_1.
-
-    (2)不同类型的数据在内存中所占的字节数和存放方式是不同的(如：整型数据占4字节，字符型数
-       据占1字节).如果想通过指针引用一个变量，只知道地址(如2000)是不够的，因为无法判断是
-       从地址为2000的一个字节中取出一个字符数据，还是从2000和2010两个字节取出short型数
-       据，还是从2000到2003四个字节取出int或float型数据?必须知道该数据的类型，才能按存
-       储单元的长度以及数据的存储形式正确地取出该数据。
-
-1.3 怎样引用指针变量?
-
-    有三种情况:
-    (1)给指针变量赋值。如: p = &amp;a; 指针变量p的值是变量a的地址，p指向a。
-    (2)引用指针变量指向的变量.
-        print(&quot;%d&quot;, *p);
-        作用：以整数形式输出指针变量p所指向的变量的值，即变量a的值。
-
-        *p = 1;
-        表示将整数1赋给p当前所指向的变量，如果p指向变量a，则相当于把1赋给a，即“a=1”.
-    (3)引用指针变量的值。如:
-        print(&quot;%o&quot;,p);
-        作用：以八进制数形式输出指针变量p的值，如果p指向了a，就是输出了a的值，即&amp;a.
-
-注意： * 指针运算符(也称&quot;简介访问&quot;运算符)，*p代表指针变量p指向的对象。
-
-栗子: 输入a和b两个整数，按先大后小的顺序输出a和b.
-{
-    int *p1, *p2, *p, a, b;
-    printf(&quot;enter two integer numbers:&quot;);
-    scanf(&quot;%d, %d&quot;, &amp;a, &amp;b);
-    p1 = &amp;a;
-    p2 = &amp;b;
-    if (a &lt; b) {
-        p = p1;
-        p1 = p2;
-        p2 = p;
-    }
-    printf(&quot;a=%d,b=%d&quot;,a,b);
-    printf(&quot;max=%d, min=%d\n&quot;,*p1, *p2);//9,5
-} a = 5, b = 9
-
-1.4 指针变量作为函数参数
-
-    函数参数可以是指针类型.
-    作用: 将一个变量的地址传送到另一个函数中.
-
-    将上面栗子改成函数实现:
-    {
-        void swap(int *p1, int *p2);
-        int a,b;
-        int *pointer_1, *pointer_2;
-        printf(&quot;enter a and b :&quot;);
-        scanf(&quot;%d,%d&quot;, &amp;a, &amp;b);
-        pointer_1 = &amp;a;
-        pointer_2 = &amp;b;
-        if (a &lt; b) {
-            swap(pointer_1, pointer_2);
-        }
-        printf(&quot;max=%d, min=%d\n&quot;,a,b);
-    }
-
-    void swap(int *p1, int *p2)
-    {
-        int temp;
-        temp = *p1;
-        *p1 = *p2;
-        *p2 = temp;
-    }
-
-    思考 swap换成以下实现:
-    void swap(int *p1, int *p2)
-    {
-        int *p;
-        p = p1;
-        p1 = p2;
-        p2 = p;
-    }
-    输出 max = 5, min = 9 不能达到预期效果.
-    因为:C语言中实参变量和形参变量之间的数据传递是单向的&quot;值传递&quot;方式。指针变量作函参时同样
-    要遵循这一规则.不可能通过执行调用函数来改变实参指针变量的值，但是可以改变实参指针所值变
-    量的值。
-</code></pre><h2 id="2-通过指针引用数组"><a href="#2-通过指针引用数组" class="headerlink" title="2.通过指针引用数组"></a>2.通过指针引用数组</h2><pre><code>2.1 数组元素的指针
-    数组元素的指针: 就是数组元素的地址.
-
-    在C语言中,数组名(不包括形参数组名,形参数组并不占据实际的内存单元)代表数组中首元素的地
-    址.
-
-2.2 引用数组元素时指针的运算
-    (1)p+1: 指向同一数组中的下一个元素;
-    (2)p-1: 指向同一数组中的上一个元素;
-    (3)p+i、a+i: 指向a数组中序号为i的元素;
-    (4)*(p+i)、*(a+i): p+i、a+i所指向的数组元素 a[i]; 
-       如:*(p+5)、*(a+5)就是 a[5]；
-    (5)p2 - p1 : p1的值为2012， p2的值为2020.  
-       p2 - p1的结果(2020 - 2012)/4 = 2,表示p2所指向的元素与p1所值得元素之间差两个元
-       素.   两个地址不能相加,无实际意义.
-
-2.3 通过指针引用数组元素
-
-    //  8.6 一个整型数组a，有10个元素，要求输出数组中的全部元素.
-    //  方案1: 下标法
-    {
-        int a[10];
-        int i;
-        printf(&quot;enter 10 numbers:&quot;);
-        for (i = 0; i &lt; 10; i++) {
-            scanf(&quot;%d&quot;, &amp;a[i]);
-        }
-
-        for (i = 0; i &lt; 10; i++) {
-            printf(&quot;%d&quot;, a[i]);
-        }
-
-        printf(&quot;\n&quot;);
-    }
-
-    //  方案2: 通过数组名计算数组元素地址，找出元素的值.
-    {
-        int a[10];
-        int i;
-        printf(&quot;enter 10 numbers:&quot;);
-        for (i = 0; i &lt; 10; i++) {
-            scanf(&quot;%d&quot;, &amp;a[i]);
-        }
-
-        for (i = 0; i &lt; 10; i++) {
-            printf(&quot;%d&quot;, *(a+i));
-        }
-
-        printf(&quot;\n&quot;);
-    }
-
-    //  方案3: 用指针变量指向数组元素. 此种方案最快，指着变量直接指向元素,不必每次都重新
-              计算地址，像p++这样的
-    {
-        int a[10];
-        int i, *p;
-        printf(&quot;enter 10 numbers:&quot;);
-        for (i = 0; i &lt; 10; i++) {
-            scanf(&quot;%d&quot;, &amp;a[i]);
-        }
-
-        for (p = a; p &lt; (a + 10); p++) {
-            printf(&quot;%d&quot;, *p);
-        }
-
-        printf(&quot;\n&quot;);
-    }
-    第三种改为:
-    for (p = a; p &lt; (a + 10); a++) {
-            printf(&quot;%d&quot;, *a);
-    }
-    是不行的，因为数组名a代表数组首元素地址，是一个指针型常量，它的值在程序运行期间是固定
-    不变的。既然a是个常量，所以a++是无法实现的。
-
-
-    //  8.7 通过指针变量输出整型数组a的10个元素.
-    {
-        int *p, i, a[10];
-        p = a;
-        printf(&quot;enter 10 number:&quot;);
-        for (i = 0; i &lt; 10; i++) {
-            scanf(&quot;%d&quot;,p++);
-        }
-
-        for (i = 0; i &lt; 10; i++, p++) {
-            printf(&quot;%d&quot;, *p);
-        }
-
-        printf(&quot;\n&quot;);
-    }
-    数组不是预期结果，程序有问题.
-    第一个for循环结束后，指针变量p是指向数组的最后一个元素的，在执行第二个for循环时，指向
-    的是数组a外的空间.
-
-    修复后:
-    for循环之间加一行: p = a;
-
-    说明:
-    (1)指向数组的指针变量也可以带下标，如p[i].
-       当指针变量指向数组元素时，指针变量可以带下标。
-       因为在程序编译时，对下标的处理方法是转换为地址的，对p[i]处理成*(p+i),如果是指向一
-       个整型数组元素a[0],则p[i]代表a[i].但是必须弄清楚p的当前值是什么？如果当前p指向
-       a[3],则p[2]并不代表a[2],而是a[3+2],即a[5].
-
-    (2)p++; *p;
-        p++使p指向下一元素a[1]。然后若再执行*p,则得到下一个元素a[1]的值。
-
-    (3)*p++;
-        由于++和*同优先级，结合方向为自右而左，因此等价于*(p++).
-        先引用p的值，实现*p的运算，然后再使p自增1.
-        for (i = 0; i &lt; 10; i++, p++) {
-            printf(&quot;%d&quot;, *p);
-       }
-       改为:
-       for (i = 0; i &lt; 10; i++) {
-            printf(&quot;%d&quot;, *p++);
-        }
-       作用一样，都是先输出*p的值，然后p值加1.这样下一次循环时，*p就是下一个元素的值.
-
-    (4)*(p++)与*(++p)作用是否相同?不相同。
-        前者是先取*p值，然后p加1.
-        后者是先是p加1，再取*p。
-
-
-2.4 数组名作函数参数
-
-    注意:实参数组名代表一个固定的地址，或者说是指针常量，但形参数组名并不是一个固定的地址，
-        而是按指针变量处理。
-</code></pre>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/04/18/指针与结构体/" data-id="cjurrnwj80001uy969ghq10ru" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
     <article id="post-AFURLSessionManager解析" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/03/13/AFURLSessionManager解析/" class="article-date">
@@ -1712,7 +1460,7 @@ return NSURLSessionTaskStateCanceling;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/03/13/AFURLSessionManager解析/" data-id="cjurrnwjw0006uy965hhpbg1u" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/03/13/AFURLSessionManager解析/" data-id="cjurrprvy0006vc96idqk8p4i" class="article-share-link">Share</a>
       
       
     </footer>
@@ -2798,7 +2546,7 @@ userAgent、request属性的KVO观察、手动指定请求头序列化的Block�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/20/AFURLRequestSerialization/" data-id="cjurrnwju0005uy96f302rad2" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/02/20/AFURLRequestSerialization/" data-id="cjurrprvx0005vc96zqd9087c" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3292,7 +3040,7 @@ AFURLSessionManager里面来解析，故而这里调用父类方法。
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/13/AFHTTPSessionManager/" data-id="cjurrnwjr0004uy96zo7335w5" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/02/13/AFHTTPSessionManager/" data-id="cjurrprvt0004vc96hhx50log" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3352,7 +3100,7 @@ AFURLSessionManager里面来解析，故而这里调用父类方法。
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/" data-id="cjurrnwj40000uy964oas4fts" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/" data-id="cjurrprv80000vc96kkuhda72" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3451,7 +3199,7 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/24/Calendar/" data-id="cjurrnwjd0002uy96mzwsopbw" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/01/24/Calendar/" data-id="cjurrprvg0002vc96g7sz5hff" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3789,7 +3537,269 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/01/24/GCD的笔记/" data-id="cjurrnwje0003uy96ynvqxpp0" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/01/24/GCD的笔记/" data-id="cjurrprvh0003vc969qe52lse" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-指针与结构体" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/11/13/指针与结构体/" class="article-date">
+  <time datetime="2017-11-12T16:00:00.000Z" itemprop="datePublished">2017-11-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/13/指针与结构体/">C语言指针记录</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-指针"><a href="#1-指针" class="headerlink" title="1.指针"></a>1.指针</h2><pre><code>1.1 栗子:
+    {
+        int a = 100, b = 10;
+        int *pointer_1, *pointer_2;
+        pointer_1 = &amp;a;
+        pointer_2 = &amp;b;
+        printf(&quot;a=%d,b=%d\n&quot;,a, b);
+        printf(&quot;*pointer_1=%d, *pointer_2=%d&quot;, *pointer_1, *pointer_2);
+    }
+
+1.2 怎样定义指针变量?
+
+    类型名 * 指针变量名;
+    如: int *pointer_1;
+
+说明:指针变量是基本数据类型派生出来的类型，它不能离开基本类型而独立存在.
+
+    (1)指针变量前面的&quot;*&quot;表示该变量的类型为指针型变量。指针变量名是pointer_1,而不是
+       *pointer_1.
+
+    (2)不同类型的数据在内存中所占的字节数和存放方式是不同的(如：整型数据占4字节，字符型数
+       据占1字节).如果想通过指针引用一个变量，只知道地址(如2000)是不够的，因为无法判断是
+       从地址为2000的一个字节中取出一个字符数据，还是从2000和2010两个字节取出short型数
+       据，还是从2000到2003四个字节取出int或float型数据?必须知道该数据的类型，才能按存
+       储单元的长度以及数据的存储形式正确地取出该数据。
+
+1.3 怎样引用指针变量?
+
+    有三种情况:
+    (1)给指针变量赋值。如: p = &amp;a; 指针变量p的值是变量a的地址，p指向a。
+    (2)引用指针变量指向的变量.
+        print(&quot;%d&quot;, *p);
+        作用：以整数形式输出指针变量p所指向的变量的值，即变量a的值。
+
+        *p = 1;
+        表示将整数1赋给p当前所指向的变量，如果p指向变量a，则相当于把1赋给a，即“a=1”.
+    (3)引用指针变量的值。如:
+        print(&quot;%o&quot;,p);
+        作用：以八进制数形式输出指针变量p的值，如果p指向了a，就是输出了a的值，即&amp;a.
+
+注意： * 指针运算符(也称&quot;简介访问&quot;运算符)，*p代表指针变量p指向的对象。
+
+栗子: 输入a和b两个整数，按先大后小的顺序输出a和b.
+{
+    int *p1, *p2, *p, a, b;
+    printf(&quot;enter two integer numbers:&quot;);
+    scanf(&quot;%d, %d&quot;, &amp;a, &amp;b);
+    p1 = &amp;a;
+    p2 = &amp;b;
+    if (a &lt; b) {
+        p = p1;
+        p1 = p2;
+        p2 = p;
+    }
+    printf(&quot;a=%d,b=%d&quot;,a,b);
+    printf(&quot;max=%d, min=%d\n&quot;,*p1, *p2);//9,5
+} a = 5, b = 9
+
+1.4 指针变量作为函数参数
+
+    函数参数可以是指针类型.
+    作用: 将一个变量的地址传送到另一个函数中.
+
+    将上面栗子改成函数实现:
+    {
+        void swap(int *p1, int *p2);
+        int a,b;
+        int *pointer_1, *pointer_2;
+        printf(&quot;enter a and b :&quot;);
+        scanf(&quot;%d,%d&quot;, &amp;a, &amp;b);
+        pointer_1 = &amp;a;
+        pointer_2 = &amp;b;
+        if (a &lt; b) {
+            swap(pointer_1, pointer_2);
+        }
+        printf(&quot;max=%d, min=%d\n&quot;,a,b);
+    }
+
+    void swap(int *p1, int *p2)
+    {
+        int temp;
+        temp = *p1;
+        *p1 = *p2;
+        *p2 = temp;
+    }
+
+    思考 swap换成以下实现:
+    void swap(int *p1, int *p2)
+    {
+        int *p;
+        p = p1;
+        p1 = p2;
+        p2 = p;
+    }
+    输出 max = 5, min = 9 不能达到预期效果.
+    因为:C语言中实参变量和形参变量之间的数据传递是单向的&quot;值传递&quot;方式。指针变量作函参时同样
+    要遵循这一规则.不可能通过执行调用函数来改变实参指针变量的值，但是可以改变实参指针所值变
+    量的值。
+</code></pre><h2 id="2-通过指针引用数组"><a href="#2-通过指针引用数组" class="headerlink" title="2.通过指针引用数组"></a>2.通过指针引用数组</h2><pre><code>2.1 数组元素的指针
+    数组元素的指针: 就是数组元素的地址.
+
+    在C语言中,数组名(不包括形参数组名,形参数组并不占据实际的内存单元)代表数组中首元素的地
+    址.
+
+2.2 引用数组元素时指针的运算
+    (1)p+1: 指向同一数组中的下一个元素;
+    (2)p-1: 指向同一数组中的上一个元素;
+    (3)p+i、a+i: 指向a数组中序号为i的元素;
+    (4)*(p+i)、*(a+i): p+i、a+i所指向的数组元素 a[i]; 
+       如:*(p+5)、*(a+5)就是 a[5]；
+    (5)p2 - p1 : p1的值为2012， p2的值为2020.  
+       p2 - p1的结果(2020 - 2012)/4 = 2,表示p2所指向的元素与p1所值得元素之间差两个元
+       素.   两个地址不能相加,无实际意义.
+
+2.3 通过指针引用数组元素
+
+    //  8.6 一个整型数组a，有10个元素，要求输出数组中的全部元素.
+    //  方案1: 下标法
+    {
+        int a[10];
+        int i;
+        printf(&quot;enter 10 numbers:&quot;);
+        for (i = 0; i &lt; 10; i++) {
+            scanf(&quot;%d&quot;, &amp;a[i]);
+        }
+
+        for (i = 0; i &lt; 10; i++) {
+            printf(&quot;%d&quot;, a[i]);
+        }
+
+        printf(&quot;\n&quot;);
+    }
+
+    //  方案2: 通过数组名计算数组元素地址，找出元素的值.
+    {
+        int a[10];
+        int i;
+        printf(&quot;enter 10 numbers:&quot;);
+        for (i = 0; i &lt; 10; i++) {
+            scanf(&quot;%d&quot;, &amp;a[i]);
+        }
+
+        for (i = 0; i &lt; 10; i++) {
+            printf(&quot;%d&quot;, *(a+i));
+        }
+
+        printf(&quot;\n&quot;);
+    }
+
+    //  方案3: 用指针变量指向数组元素. 此种方案最快，指着变量直接指向元素,不必每次都重新
+              计算地址，像p++这样的
+    {
+        int a[10];
+        int i, *p;
+        printf(&quot;enter 10 numbers:&quot;);
+        for (i = 0; i &lt; 10; i++) {
+            scanf(&quot;%d&quot;, &amp;a[i]);
+        }
+
+        for (p = a; p &lt; (a + 10); p++) {
+            printf(&quot;%d&quot;, *p);
+        }
+
+        printf(&quot;\n&quot;);
+    }
+    第三种改为:
+    for (p = a; p &lt; (a + 10); a++) {
+            printf(&quot;%d&quot;, *a);
+    }
+    是不行的，因为数组名a代表数组首元素地址，是一个指针型常量，它的值在程序运行期间是固定
+    不变的。既然a是个常量，所以a++是无法实现的。
+
+
+    //  8.7 通过指针变量输出整型数组a的10个元素.
+    {
+        int *p, i, a[10];
+        p = a;
+        printf(&quot;enter 10 number:&quot;);
+        for (i = 0; i &lt; 10; i++) {
+            scanf(&quot;%d&quot;,p++);
+        }
+
+        for (i = 0; i &lt; 10; i++, p++) {
+            printf(&quot;%d&quot;, *p);
+        }
+
+        printf(&quot;\n&quot;);
+    }
+    数组不是预期结果，程序有问题.
+    第一个for循环结束后，指针变量p是指向数组的最后一个元素的，在执行第二个for循环时，指向
+    的是数组a外的空间.
+
+    修复后:
+    for循环之间加一行: p = a;
+
+    说明:
+    (1)指向数组的指针变量也可以带下标，如p[i].
+       当指针变量指向数组元素时，指针变量可以带下标。
+       因为在程序编译时，对下标的处理方法是转换为地址的，对p[i]处理成*(p+i),如果是指向一
+       个整型数组元素a[0],则p[i]代表a[i].但是必须弄清楚p的当前值是什么？如果当前p指向
+       a[3],则p[2]并不代表a[2],而是a[3+2],即a[5].
+
+    (2)p++; *p;
+        p++使p指向下一元素a[1]。然后若再执行*p,则得到下一个元素a[1]的值。
+
+    (3)*p++;
+        由于++和*同优先级，结合方向为自右而左，因此等价于*(p++).
+        先引用p的值，实现*p的运算，然后再使p自增1.
+        for (i = 0; i &lt; 10; i++, p++) {
+            printf(&quot;%d&quot;, *p);
+       }
+       改为:
+       for (i = 0; i &lt; 10; i++) {
+            printf(&quot;%d&quot;, *p++);
+        }
+       作用一样，都是先输出*p的值，然后p值加1.这样下一次循环时，*p就是下一个元素的值.
+
+    (4)*(p++)与*(++p)作用是否相同?不相同。
+        前者是先取*p值，然后p加1.
+        后者是先是p加1，再取*p。
+
+
+2.4 数组名作函数参数
+
+    注意:实参数组名代表一个固定的地址，或者说是指针常量，但形参数组名并不是一个固定的地址，
+        而是按指针变量处理。
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/11/13/指针与结构体/" data-id="cjurrprvb0001vc96uo1imwvq" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3817,7 +3827,7 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li></ul>
     </div>
   </div>
 
@@ -3828,10 +3838,6 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
-        
-          <li>
-            <a href="/2019/04/18/指针与结构体/">(no title)</a>
-          </li>
         
           <li>
             <a href="/2019/03/13/AFURLSessionManager解析/">AFNetwoking之AFURLSessionManager(二)</a>
@@ -3847,6 +3853,10 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
         
           <li>
             <a href="/2019/01/24/iOS-category不能添加属性探究/">iOS category不能添加属性探究</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/24/Calendar/">Calendar相关计算</a>
           </li>
         
       </ul>
