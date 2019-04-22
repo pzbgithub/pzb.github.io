@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>AFNetworking之AFHTTPSessionManager(一) | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="AFHTTPSessionManager源码解析1. 简要介绍AFHTTPSessionManager是AFURLSessionManager的子类，封装了常用的GET、  PUT、 HEAD、POST等请求的方法。     建议在使用时，继承AFHTTPSessionManager，提供一种返回共享单例对象的类方法，在该对   象上可以在应用程序之间共享身份验证和其他配置(同时也是解决内存泄漏的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AFNetworking之AFHTTPSessionManager(一)">
+<meta property="og:url" content="http://yoursite.com/2019/02/13/AFHTTPSessionManager/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="AFHTTPSessionManager源码解析1. 简要介绍AFHTTPSessionManager是AFURLSessionManager的子类，封装了常用的GET、  PUT、 HEAD、POST等请求的方法。     建议在使用时，继承AFHTTPSessionManager，提供一种返回共享单例对象的类方法，在该对   象上可以在应用程序之间共享身份验证和其他配置(同时也是解决内存泄漏的">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/737950-d866c9c4ada203d8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/737950-0d11935a93e428be.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/737950-ea52b90834b2d7fe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-03-26T02:46:15.099Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AFNetworking之AFHTTPSessionManager(一)">
+<meta name="twitter:description" content="AFHTTPSessionManager源码解析1. 简要介绍AFHTTPSessionManager是AFURLSessionManager的子类，封装了常用的GET、  PUT、 HEAD、POST等请求的方法。     建议在使用时，继承AFHTTPSessionManager，提供一种返回共享单例对象的类方法，在该对   象上可以在应用程序之间共享身份验证和其他配置(同时也是解决内存泄漏的">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/737950-d866c9c4ada203d8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-AFHTTPSessionManager" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/02/13/AFHTTPSessionManager/" class="article-date">
+  <time datetime="2019-02-12T16:00:00.000Z" itemprop="datePublished">2019-02-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      AFNetworking之AFHTTPSessionManager(一)
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="AFHTTPSessionManager源码解析"><a href="#AFHTTPSessionManager源码解析" class="headerlink" title="AFHTTPSessionManager源码解析"></a><center>AFHTTPSessionManager源码解析</center></h1><h2 id="1-简要介绍"><a href="#1-简要介绍" class="headerlink" title="1. 简要介绍"></a>1. 简要介绍</h2><pre><code>AFHTTPSessionManager是AFURLSessionManager的子类，封装了常用的GET、 
+PUT、 HEAD、POST等请求的方法。
+
+   建议在使用时，继承AFHTTPSessionManager，提供一种返回共享单例对象的类方法，在该对  
+象上可以在应用程序之间共享身份验证和其他配置(同时也是解决内存泄漏的方法)。
+</code></pre><p><img src="https://upload-images.jianshu.io/upload_images/737950-d866c9c4ada203d8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图片.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/737950-0d11935a93e428be.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图片.png"></p>
+<h2 id="2-POST请求的常用格式"><a href="#2-POST请求的常用格式" class="headerlink" title="2. POST请求的常用格式"></a>2. POST请求的常用格式</h2><pre><code>HTTP/1.1协议规定的HTTP请求方法有OPTIONS、GET、HEAD、POST、PUT、DELETE、TRACE、
+CONNECT 这几种。其中POST一般用来向服务端提交数据，接下来要讨论POST提交数据的几种方式。协议
+规定POST提交的数据必须放在消息主体中，但协议并没有规定数据必须使用什么编码方式。实际上，开发
+者完全可以自己决定消息主体的格式，只要最后发送的 HTTP 请求满足上面的格式就可以。
+
+但是，数据发送出去，还要服务端解析成功才有意义。一般服务端语言如php、python等，以及它们的
+framework，都内置了自动解析常见数据格式的功能。服务端通常是根据请求头（headers）中的
+Content-Type字段来获知请求中的消息主体是用何种方式编码，再对主体进行解析。所以说到POST提交
+数据方案，包含了Content-Type和消息主体编码方式两部分。
+</code></pre><p><strong>2.1 application/x-www-form-urlencoded格式的POST请求</strong></p>
+<pre><code>这应该是最常见的 POST 提交数据的方式了。浏览器的原生表单，如果不设置enctype属性，那么最终就
+会以application/x-www-form-urlencoded方式提交数据。Content-Type被指定为application/
+x-www-form-urlencoded，提交的数据按照 key1=val1&amp;key2=val2的方式进行编码，key和val都进
+行了URL转码。
+
+下面这个请求是简书进入一篇文章页面的时候，会自动往服务器POST一个请求，估计是统计文章被阅读的
+次数等功能。具体看下面：
+
+    //  发送的请求，删除了cookie相关的部分
+    POST /notes/e15592ce40ae/mark_viewed.json HTTP/1.1
+    Host: www.jianshu.com
+    User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:52.0) Gecko/20100101 Firefox/52.0
+    Accept: */*
+    Accept-Language: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3
+    Accept-Encoding: gzip, deflate
+    X-CSRF-Token: vJvptva4Tqou/V3dd3nFCrcvRsb78FReHuIYZke5PVAnfR/tIAAMCfuaB2Z2/gaEohIZAsiEksUYyPqzg3DpSA==
+    Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+    X-Requested-With: XMLHttpRequest
+    Referer: http://www.jianshu.com/p/e15592ce40ae
+    Content-Length: 98
+    Connection: keep-alive
+    Cache-Control: max-age=0
+    //请求体
+
+    uuid=4e3abc0f-1824-4a5d-982f-7d9dee92d9cd&amp;referrer=http%3A%2F%2Fwww.jianshu.com%2Fu%2Fad726ba6935d
+</code></pre><p><strong>用AFHTTPSessionManager实现上面这个application/x-www-form-urlencoded请求。</strong></p>
+<pre><code>AFHTTPSessionManager *manager = [[AFHTTPSessionManager alloc]initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+NSDictionary *params = @{
+                         @&quot;uuid&quot;:@&quot;4e3abc0f-1824-4a5d-982f-7d9dee92d9cd&quot;,
+                         @&quot;referrer&quot;:@&quot;http://www.jianshu.com/p/e15592ce40ae&quot;
+                         };
+NSURLSessionDataTask *task = [manager POST:@&quot;http://www.jianshu.com//notes/e15592ce40ae/mark_viewed.json&quot; parameters:params progress:^(NSProgress * _Nonnull uploadProgress) {
+    NSLog(@&quot;进度更新&quot;);
+} success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+    NSLog(@&quot;返回数据：%@&quot;,responseObject);
+} failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+    NSLog(@&quot;返回错误：%@&quot;,error);
+}];
+[task resume];
+</code></pre><p><strong>2.2 multipart/form-data格式的POST请求</strong></p>
+<pre><code>Multipart/form-data的基础方法是POST , 也就是说是由POST方法来组合实现的. Multipart/
+form-data与POST方法的不同之处在于请求头和请求体. Multipart/form-data的请求头必须包含一
+个特殊的头信息 : Content-Type , 且其值也必须规定为multipart/form-data , 同时还需要规定
+一个内容分割符用于分割请求体中的多个POST的内容 , 如文件内容和文本内容自然需要分割开来 , 不然
+接收方就无法正常解析和还原这个文件了. Multipart/form-data的请求体也是一个字符串 , 不过和
+post的请求体不同的是它的构造方式 , post是简单的name=value值连接 , 而Multipart/form-
+data则是添加了分隔符等内容的构造体.
+
+请求的头部信息如下:
+
+//  其中xxxxx是我自定义的分隔符，每个人都可以选择自己的分隔符
+Content-Type: multipart/form-data; boundary=xxxxx
+</code></pre><p><strong>下面我们来看一下一个我的Multipart/form-data请求体:</strong></p>
+<pre><code>POST /uploadFile HTTP/1.1
+Host: 这里是url,就不暴露了^_^
+Content-Type: multipart/form-data; boundary=xxxxx
+Connection: keep-alive
+Accept: */*
+User-Agent: AFNetWorking3.X%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/1 CFNetwork/808.2.16 Darwin/15.6.0
+Content-Length: 32175
+Accept-Language: en-us
+Accept-Encoding: gzip, deflate
+
+--xxxxx
+Content-Disposition: form-data;name=&quot;file&quot;
+
+img.jpeg
+--xxxxx
+Content-Disposition: form-data;name=&quot;businessType&quot;
+
+CC_USER_CENTER
+--xxxxx
+Content-Disposition: form-data;name=&quot;fileType&quot;
+
+image
+--xxxxx
+Content-Disposition:form-data;name=&quot;file&quot;;filename=&quot;img1.jpeg&quot;
+Content-Type:image/png
+
+这里是图片数据,太长了.我就删了
+
+--xxxxx--
+</code></pre><p><strong>这个请求有三个参数file,businessType,fileType。比如file参数和他的值就通过如下格式传输：</strong></p>
+<pre><code>  --xxxxx
+Content-Disposition: form-data;name=&quot;file&quot;
+
+img.jpeg
+</code></pre><p><strong>上面这种就是一个参数与之对应的值。协议规定的就是这个格式，没有为什么。我们可以看看图片数据部分：</strong></p>
+<pre><code>--xxxxx
+Content-Disposition:form-data;name=&quot;file&quot;;filename=&quot;img1.jpeg&quot;
+Content-Type:image/png
+
+这里是图片数据,太长了.我就删了
+
+--xxxxx--
+</code></pre><p>其中name=”参数名” filename=”文件名” 其中参数名这个要和接收方那边相对应 正常开发中可以去问服务器那边 , 文件名是说在服务器端保存成文件的名字 , 这个参数然并卵 , 因为一般服务端会按照他们自己的要求去处理文件的存储.</p>
+<p>下一行是指定类型 , 我这里示例中写的是PNG图片类型 , 这个可以根据你的实际需求的写。如果我们要上传多分图片或者文件，则只需要按照指定格式就可以了，比如下面就是上传两张图片的请求：</p>
+<pre><code>POST /uploadFile HTTP/1.1
+Host: 这里是url,就不暴露了^_^
+Content-Type: multipart/form-data; boundary=xxxxx
+Connection: keep-alive
+Accept: */*
+User-Agent: AFNetWorking3.X%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/1 CFNetwork/808.2.16 Darwin/15.6.0
+Content-Length: 32175
+Accept-Language: en-us
+Accept-Encoding: gzip, deflate
+
+--xxxxx
+Content-Disposition: form-data;name=&quot;file&quot;
+
+img.jpeg
+--xxxxx
+Content-Disposition: form-data;name=&quot;businessType&quot;
+
+CC_USER_CENTER
+--xxxxx
+Content-Disposition: form-data;name=&quot;fileType&quot;
+
+image
+--xxxxx
+Content-Disposition:form-data;name=&quot;file&quot;;filename=&quot;img1.jpeg&quot;
+Content-Type:image/png
+
+这里是图片1数据,太长了.我就删了
+--xxxxx
+Content-Disposition:form-data;name=&quot;file&quot;;filename=&quot;img2.jpeg&quot;
+Content-Type:image/png
+
+这里是图片1数据,太长了.我就删了
+--xxxxx--
+</code></pre><p>下面是我Demo中一个multipart/form-data请求的实现代码,分别用NSRULDataTask和AFHTTPSessionManager实现,我们可以发现用第二种方法简便了很多，因为AFN已经帮我们做好了拼接工作：</p>
+<pre><code>- (IBAction)updatePic:(id)sender {
+    //请求头参数
+    NSDictionary *dic = @{
+                          @&quot;businessType&quot;:@&quot;CC_USER_CENTER&quot;,
+                          @&quot;fileType&quot;:@&quot;image&quot;,
+                          @&quot;file&quot;:@&quot;img.jpeg&quot;
+                          };
+    //请求体图片数据
+    NSData *imageData = UIImagePNGRepresentation([UIImage imageNamed:@&quot;1.png&quot;]);
+    //创建request
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc]initWithURL:[NSURL URLWithString:url]];
+    //post方法
+    [request setHTTPMethod:@&quot;POST&quot;];
+    // 设置请求头格式为Content-Type:multipart/form-data; boundary=xxxxx
+    //[request setValue:@&quot;multipart/form-data; boundary=xxxxx&quot; forHTTPHeaderField:@&quot;Content-Type&quot;];
+    AFHTTPSessionManager *manager = [[AFHTTPSessionManager alloc]initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+    NSURLSessionDataTask *task = [manager POST:url parameters:dic constructingBodyWithBlock:^(id&lt;AFMultipartFormData&gt;  _Nonnull formData) {
+        //请求体里面的参数
+        NSDictionary *bodyDic = @{
+                                  @&quot;Content-Disposition&quot;:@&quot;form-data;name=\&quot;file\&quot;;filename=\&quot;img.jpeg\&quot;&quot;,
+                                  @&quot;Content-Type&quot;:@&quot;image/png&quot;,
+                                  };
+        [formData appendPartWithHeaders:bodyDic body:imageData];
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        NSLog(@&quot;下载进度&quot;);
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSLog(@&quot;下载成功:%@&quot;,responseObject);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        NSLog(@&quot;下载失败%@&quot;,error);
+    }];
+    [task resume];
+}
+</code></pre><p>Multipart/form-data格式的POST请求总结：</p>
+<pre><code>1.文件类型参数中name=&quot;参数名&quot;一定要和服务端对应, 开发的时候 , 可以问服务端人员，我这里是
+  file。
+2.上传文件的数据部分使用二进制数据(NSData)拼接。
+3.上边界部分和下边界部分的字符串 , 最后都要转换成二进制数据(NSData) , 和文件部分的二进制数 
+  据拼接在一起 , 作为请求体发送给服务器。
+4.每一行末尾需要有一定的`\r\n·。
+</code></pre><p><strong>2.3 application/json格式的POST请求</strong></p>
+<p>接下来我将常使用NSURLSessionDataTask做一个application/json的POST请求。并且请求体数据我存储在一个test.txt文件中，从文件中读取出来然后上传。</p>
+<pre><code>//  test.txt文件内容
+{&quot;name&quot;:&quot;huang&quot;,&quot;phone&quot;:&quot;124&quot;}
+</code></pre><p>我的请求如下，和其他POST请求原理一样，只是拼接请求体的方式不一样，并且更具不同格式的请求体，设置不同的Content-Type：</p>
+<pre><code>POST /posts HTTP/1.1
+Host: jsonplaceholder.typicode.com
+Content-Type: application/json
+Connection: keep-alive
+Accept: application/json
+User-Agent: AFNetWorking3.X%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/1 CFNetwork/808.2.16 Darwin/15.6.0
+Content-Length: 31
+Accept-Language: en-us
+Accept-Encoding: gzip, deflate
+
+{&quot;name&quot;:&quot;huang&quot;,&quot;phone&quot;:&quot;124&quot;}
+</code></pre><p><strong>下面是我Demo的具体实现:</strong></p>
+<pre><code>- (IBAction)applicationjsonPOST2:(id)sender {
+    NSMutableURLRequest * request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@&quot;http://jsonplaceholder.typicode.com/posts&quot;]];
+    //指请求体的类型。由于我们test.txt里面的文件是json格式的字符串。所以我这里指定为`application/json`
+    [request addValue:@&quot;application/json&quot; forHTTPHeaderField:@&quot;Content-Type&quot;];
+    [request addValue:@&quot;application/json&quot; forHTTPHeaderField:@&quot;Accept&quot;];
+    [request setHTTPMethod:@&quot;POST&quot;];
+    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
+    [request setTimeoutInterval:20];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@&quot;test&quot; ofType:@&quot;txt&quot;];
+    NSURL *url = [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+    //使用Block来处理返回数据
+    NSURLSessionDataTask *task = [session uploadTaskWithRequest:request fromFile:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        NSString *result = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
+        NSLog(@&quot;%@&quot;,result);
+    }];
+    [task resume];
+}
+</code></pre><h2 id="3-简要介绍"><a href="#3-简要介绍" class="headerlink" title="3. 简要介绍"></a>3. 简要介绍</h2><h4 id="属性"><a href="#属性" class="headerlink" title="属性 :"></a>属性 :</h4><pre><code>@property (readonly, nonatomic, strong, nullable) NSURL *baseURL;
+
+@property (nonatomic, strong) AFHTTPRequestSerializer &lt;AFURLRequestSerialization&gt; * requestSerializer;
+
+@property (nonatomic, strong) AFHTTPResponseSerializer &lt;AFURLResponseSerialization&gt; * responseSerializer;
+
+@property (nonatomic, strong) AFSecurityPolicy *securityPolicy;
+</code></pre><h4 id="方法"><a href="#方法" class="headerlink" title="方法 :"></a>方法 :</h4><pre><code>+ (instancetype)manager;
+
+- (instancetype)initWithBaseURL:(nullable NSURL *)url;
+
+- (instancetype)initWithBaseURL:(nullable NSURL *)url
+       sessionConfiguration:(nullable NSURLSessionConfiguration 
+       *)configuration NS_DESIGNATED_INITIALIZER;
+
+//    GET
+- (nullable NSURLSessionDataTask *)GET:(NSString *)URLString
+                        parameters:(nullable id)parameters
+                           headers:(nullable NSDictionary &lt;NSString *, NSString *&gt; *)headers
+                          progress:(nullable void (^)(NSProgress *downloadProgress))downloadProgress
+                           success:(nullable void (^)(NSURLSessionDataTask *task, id _Nullable responseObject))success
+                           failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError *error))failure;
+
+//    HEAD
+- (nullable NSURLSessionDataTask *)HEAD:(NSString *)URLString
+                         parameters:(nullable id)parameters
+                            headers:(nullable NSDictionary &lt;NSString *, NSString *&gt; *)headers
+                            success:(nullable void (^)(NSURLSessionDataTask *task))success
+                            failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError *error))failure;
+
+//    POST             
+- (nullable NSURLSessionDataTask *)POST:(NSString *)URLString
+                         parameters:(nullable id)parameters
+                            headers:(nullable NSDictionary &lt;NSString *, NSString *&gt; *)headers
+                           progress:(nullable void (^)(NSProgress *uploadProgress))uploadProgress
+                            success:(nullable void (^)(NSURLSessionDataTask *task, id _Nullable responseObject))success
+                            failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError *error))failure;
+
+
+//    PUT
+- (nullable NSURLSessionDataTask *)PUT:(NSString *)URLString
+                        parameters:(nullable id)parameters
+                           headers:(nullable NSDictionary &lt;NSString *, NSString *&gt; *)headers
+                           success:(nullable void (^)(NSURLSessionDataTask *task, id _Nullable responseObject))success
+                           failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError *error))failure;
+
+
+//    POST  文件上传     
+- (nullable NSURLSessionDataTask *)POST:(NSString *)URLString
+                         parameters:(nullable id)parameters
+                            headers:(nullable NSDictionary &lt;NSString *, NSString *&gt; *)headers
+          constructingBodyWithBlock:(nullable void (^)(id &lt;AFMultipartFormData&gt; formData))block
+                           progress:(nullable void (^)(NSProgress *uploadProgress))uploadProgress
+                            success:(nullable void (^)(NSURLSessionDataTask *task, id _Nullable responseObject))success
+                            failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError *error))failure;
+
+
+
+栗子 : 
+关于文件上传使用AFN就简单多了，也不需要我们去拼接请求体和请求文件参数啦，AFN内部已经帮我们拼
+接好了.
+
+方法一：formData 添加data形式数据
+
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    NSString *url =@&quot;http://120.25.226.186:32812/upload&quot;;
+    [manager POST:url parameters:nil constructingBodyWithBlock:^(id&lt;AFMultipartFormData&gt;  _Nonnull formData) {
+        // formData 将要上传的数据
+        UIImage *image =[UIImage imageNamed:@&quot;123&quot;];
+        NSData *data =UIImagePNGRepresentation(image);
+        // 方法一
+        /** 
+          data:上传文件二进制数据
+          name:接口的名字
+          fileName:文件上传到服务器之后叫什么名字
+          mineType:上传文件的类型，可以上传任意二进制mineType.
+         */
+        [formData appendPartWithFileData:data name:@&quot;file&quot; fileName:@&quot;123.png&quot; mimeType:@&quot;image/png&quot;];
+        // 方法二
+        /**
+         data:上传文件二进制数据
+         name:接口的名字
+         这种方法内部会将文件名当做上传到服务器之后的名字，并自动获取其类型
+         */
+        [formData appendPartWithFormData:data name:@&quot;file&quot;];
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        // 上传进度
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        // 上传成功
+        NSLog(@&quot;上传成功&quot;);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        // 上传失败
+        NSLog(@&quot;上传失败&quot;);
+    }];
+
+
+方法二：formData直接添加url
+
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    NSString *url =@&quot;http://120.25.226.186:32812/upload&quot;;
+    [manager POST:url parameters:nil constructingBodyWithBlock:^(id&lt;AFMultipartFormData&gt;  _Nonnull formData) {
+        // formData 将要上传的数据
+        // 直接传URL
+        NSURL *url =[NSURL fileURLWithPath:@&quot;/Users/yangboxing/Desktop/Snip20160905_7.png&quot;];
+        // 方法一
+        [formData appendPartWithFileURL:url name:@&quot;file&quot; fileName:@&quot;hhaha.png&quot; mimeType:@&quot;image/png&quot; error:nil];
+        // 方法二
+        /** 
+         这个方法会自动截取url最后一块的文件名作为上传到服务器的文件名 
+         也会自动获取mimeType，如果没有办法获取mimeType 就使用@&quot;application/octet-stream&quot; 表示任意的二进制数据 ，当我们不在意文件类型的时候 也可以用这个。
+         */
+        [formData appendPartWithFileURL:url name:@&quot;file&quot; error:nil];
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        // 上传进度
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        // 上传成功
+        NSLog(@&quot;上传成功&quot;);
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        // 上传失败
+        NSLog(@&quot;上传失败&quot;);
+    }];
+</code></pre><h2 id="4-结构图"><a href="#4-结构图" class="headerlink" title="4. 结构图"></a>4. 结构图</h2><pre><code>在进行一个网络请求之前，我们都是习惯把AFNetworking进行一次封装，且内部实现是用   
+AFHTTPSessionManager类来创建manager对象调用GET、PUT、HEAD、POST等网络请求，
+那么这里先给出AFHTTPSessionManager创建对象的流程图：
+</code></pre><p><img src="https://upload-images.jianshu.io/upload_images/737950-ea52b90834b2d7fe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图片.png"></p>
+<pre><code>从上图可以看出，我们可以任意调用其中一个方法来创建AFHTTPSessionManager对象，
+调用最终聚集在最后的initWithBaseURL:  sessionConfiguration:里，这个方法会先调用父类
+AFURLSessionManager的构造函数完成基本对象的初始化。
+
+然后在AFHTTPSessionManager的该方法里初始化requestSerializer、responseSerializer属
+性，
+
+responseSerializer（默认AFJSONResponseSerializer）.
+
+接着实现requestSerializer、responseSerializer的setter方法，
+
+注意：
+responseSerializer的实现是[super setResponseSerializer:responseSerializer];
+responseSerializer是用于解析请求的响应结果，而响应的结果处理是在父类，
+AFURLSessionManager里面来解析，故而这里调用父类方法。
+</code></pre><p>接下来是真正的调用AFHTTPSessionManager提供的GET、PUT、HEAD、POST等请求方法。</p>
+<p>以GET、POST为例 : </p>
+<pre><code>- (NSURLSessionDataTask *)GET:(NSString *)URLString
+                       parameters:(id)parameters
+                          headers:(nullable NSDictionary &lt;NSString *, NSString *&gt; *)headers
+                         progress:(void (^)(NSProgress * _Nonnull))downloadProgress
+                          success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
+                          failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure
+    {
+
+    NSURLSessionDataTask *dataTask = [self dataTaskWithHTTPMethod:@&quot;GET&quot;
+                                                        URLString:URLString
+                                                       parameters:parameters
+                                                          headers:headers
+                                                   uploadProgress:nil
+                                            downloadProgress:downloadProgress 
+                                            success:success
+                                             failure:failure];
+
+        [dataTask resume];
+
+        return dataTask;
+    }
+
+
+- (nullable NSURLSessionDataTask *)POST:(NSString *)URLString
+                         parameters:(nullable id)parameters
+                            headers:(nullable NSDictionary &lt;NSString *, NSString *&gt; *)headers
+                           progress:(nullable void (^)(NSProgress *uploadProgress))uploadProgress
+                            success:(nullable void (^)(NSURLSessionDataTask *task, id _Nullable responseObject))success
+                            failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError *error))failure
+    {
+        NSURLSessionDataTask *dataTask = [self dataTaskWithHTTPMethod:@&quot;POST&quot;
+                                      URLString:URLString
+                                       parameters:parameters
+                                       headers:headers
+                                       uploadProgress:uploadProgress
+                                       downloadProgress:nil
+                                       success:success
+                                         failure:failure];
+
+        [dataTask resume];
+
+        return dataTask;
+    }
+
+    这两个方法都会调用共同的方法 : 
+
+        - (NSURLSessionDataTask *)dataTaskWithHTTPMethod:(NSString *)method
+                                       URLString:(NSString *)URLString
+                                      parameters:(id)parameters
+                                         headers:(NSDictionary &lt;NSString *, NSString *&gt; *)headers
+                                  uploadProgress:(nullable void (^)(NSProgress *uploadProgress)) uploadProgress
+                                downloadProgress:(nullable void (^)(NSProgress *downloadProgress)) downloadProgress
+                                         success:(void (^)(NSURLSessionDataTask *, id))success
+                                         failure:(void (^)(NSURLSessionDataTask *, NSError *))failure
+    {
+
+
+        NSError *serializationError = nil;
+        NSMutableURLRequest *request = [self.requestSerializer requestWithMethod:method
+                                                                       URLString:[[NSURL URLWithString:URLString relativeToURL:self.baseURL] absoluteString] parameters:parameters
+                                                                           error:&amp;serializationError];
+        for (NSString *headerField in headers.keyEnumerator) {
+            [request addValue:headers[headerField] forHTTPHeaderField:headerField];
+         }
+        if (serializationError) {
+            if (failure) {
+                dispatch_async(self.completionQueue ?: dispatch_get_main_queue(), ^{
+                    failure(nil, serializationError);
+                });
+            }
+
+            return nil;
+        }
+
+        __block NSURLSessionDataTask *dataTask = nil;
+        dataTask = [self dataTaskWithRequest:request
+                              uploadProgress:uploadProgress
+                            downloadProgress:downloadProgress
+                           completionHandler:^(NSURLResponse * __unused response, id responseObject, NSError *error) {
+            if (error) {
+                if (failure) {
+                    failure(dataTask, error);
+                }
+            } else {
+                if (success) {
+                    success(dataTask, responseObject);
+                }
+            }
+        }];
+
+        return dataTask;
+    }
+
+    此方法会调用父类AFURLSessionManager的dataTaskWithRequest方法.
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/02/13/AFHTTPSessionManager/" data-id="cjurrl63z0004ub96nrsg47b4" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/02/20/AFURLRequestSerialization/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          AFNetworking之AFURLRequestSerialization(三)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/01/24/iOS-category不能添加属性探究/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">iOS category不能添加属性探究</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/18/指针与结构体/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/03/13/AFURLSessionManager解析/">AFNetwoking之AFURLSessionManager(二)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/20/AFURLRequestSerialization/">AFNetworking之AFURLRequestSerialization(三)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/13/AFHTTPSessionManager/">AFNetworking之AFHTTPSessionManager(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/24/iOS-category不能添加属性探究/">iOS category不能添加属性探究</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

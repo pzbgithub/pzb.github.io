@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>iOS category不能添加属性探究 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="既然要探究的是分类，那么我们先看一下分类的定义:  再看下Class的定义:  对比结果： 对比可以发现category中少了 struct objc_ivar_list * _Nullable ivars也就是说没有ivar数组，猜测这是原因，下面来做实验。 举例： 声明一个Dog类：   打印结果：name的属性，系统默认生成的_name的实例变量，还有getter setter方法。  加上">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS category不能添加属性探究">
+<meta property="og:url" content="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="既然要探究的是分类，那么我们先看一下分类的定义:  再看下Class的定义:  对比结果： 对比可以发现category中少了 struct objc_ivar_list * _Nullable ivars也就是说没有ivar数组，猜测这是原因，下面来做实验。 举例： 声明一个Dog类：   打印结果：name的属性，系统默认生成的_name的实例变量，还有getter setter方法。  加上">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_8fbb59c10fdccb4a84cde7b124d06093.png">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_41a6ef4db0bb285ae1a121095adca731.png">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_8bca297a2f8bf59b160713272b8c6c1c.png">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_3ebb069439d55c20a2b81b806fb1e191.png">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_8f9718f6a5609b1ce609b57e92660c8a.png">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_f59a54929bd29ff78ee71430d320c5cd.png">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_cf4b8446c4e26c880cc14572b2bc338f.png">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_5f4c486b1d93ab210078cb3a384ee307.png">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_6cb47d7dc490d397c6b69f01fc03f010.png">
+<meta property="og:updated_time" content="2019-01-24T08:55:30.208Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS category不能添加属性探究">
+<meta name="twitter:description" content="既然要探究的是分类，那么我们先看一下分类的定义:  再看下Class的定义:  对比结果： 对比可以发现category中少了 struct objc_ivar_list * _Nullable ivars也就是说没有ivar数组，猜测这是原因，下面来做实验。 举例： 声明一个Dog类：   打印结果：name的属性，系统默认生成的_name的实例变量，还有getter setter方法。  加上">
+<meta name="twitter:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_8fbb59c10fdccb4a84cde7b124d06093.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-iOS-category不能添加属性探究" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/01/24/iOS-category不能添加属性探究/" class="article-date">
+  <time datetime="2019-01-24T08:53:55.000Z" itemprop="datePublished">2019-01-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      iOS category不能添加属性探究
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>既然要探究的是分类，那么我们先看一下分类的定义:</p>
+<p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_8fbb59c10fdccb4a84cde7b124d06093.png" alt="图片.png"></p>
+<p>再看下Class的定义:</p>
+<p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_41a6ef4db0bb285ae1a121095adca731.png" alt="图片.png"></p>
+<p><strong>对比结果：</strong></p>
+<p>对比可以发现category中少了 struct objc_ivar_list * _Nullable ivars也就是说没有ivar数组，猜测这是原因，下面来做实验。</p>
+<p><strong>举例：</strong></p>
+<p>声明一个Dog类：</p>
+<p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_8bca297a2f8bf59b160713272b8c6c1c.png" alt="图片.png"></p>
+<p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_3ebb069439d55c20a2b81b806fb1e191.png" alt="图片.png"></p>
+<p>打印结果：name的属性，系统默认生成的_name的实例变量，还有getter setter方法。</p>
+<p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_8f9718f6a5609b1ce609b57e92660c8a.png" alt="图片.png"></p>
+<p>加上分类之后打印结果：发现只是在属性的列表里添加了color属性，并没有生成对应的ivar即_color，也出现了上面警告的并没有实现getter和setter方法；所以我们无法通过getter和setter方法操作color也不能直接访问_color，应该是并不存在这样一个地址供我们去访问。</p>
+<p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_f59a54929bd29ff78ee71430d320c5cd.png" alt="图片.png"></p>
+<p>问题分析完了，如何添加呢？根据问题我们要解决的是实现getter和setter方法，并且找到一个地址空间供我们访问：系统也帮我们提供了这样的方法：</p>
+<p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_cf4b8446c4e26c880cc14572b2bc338f.png" alt="图片.png"></p>
+<p>进行关联之后来看下，是不是对应的getter和setter已经ivar了，打印结果：</p>
+<p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_5f4c486b1d93ab210078cb3a384ee307.png" alt="图片.png"></p>
+<p>可以看到实现了getter和setter之后已经能够看到了color和setColor了，但是仍然没有ivar的_color，这个是当然的，系统没有实现我们也没添加，所谓的关联是我们通过const char的key(指针)来访问关联的对象的，所以关联之后我们只能通过getter和setter方法去操作，不能直接用ivar _color访问！！！<br>上面是把我们看到的现象进行分析，思考其为什么会有这样的现象呢？分类并不会改变原有类的内存分布的情况，它是在运行期间决定的，此时内存的分布已经确定，若此时再添加实例会改变内存的分布情况，这对编译性语言是灾难，是不允许的。</p>
+<p><strong>最后探讨一下：</strong></p>
+<p>const NSString * temp = @”123”;</p>
+<p>NSString *const temp2 = @”798”;</p>
+<p>这里讲述一下指针常量、常量指针的区别：</p>
+<p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_6cb47d7dc490d397c6b69f01fc03f010.png" alt="图片.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/" data-id="cjurrl63c0000ub96sxjxn2yh" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/02/13/AFHTTPSessionManager/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          AFNetworking之AFHTTPSessionManager(一)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/01/24/Calendar/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Calendar相关计算</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/18/指针与结构体/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/03/13/AFURLSessionManager解析/">AFNetwoking之AFURLSessionManager(二)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/20/AFURLRequestSerialization/">AFNetworking之AFURLRequestSerialization(三)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/13/AFHTTPSessionManager/">AFNetworking之AFHTTPSessionManager(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/24/iOS-category不能添加属性探究/">iOS category不能添加属性探究</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>Calendar相关计算 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="日历的方法解释1.返回单元的最大范围。就Gregorian来说有:   NSEraCalendarUnit =&amp;gt; 0 - 2&amp;lt;br&amp;gt; NSYearCalendarUnit =&amp;gt; 1 - 10000&amp;lt;br&amp;gt; NSMonthCalendarUnit = 1 - 12&amp;lt;br&amp;gt; NSDayCalendarUnit = 1 - 31&amp;lt;br&amp;gt; NSH">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Calendar相关计算">
+<meta property="og:url" content="http://yoursite.com/2019/01/24/Calendar/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="日历的方法解释1.返回单元的最大范围。就Gregorian来说有:   NSEraCalendarUnit =&amp;gt; 0 - 2&amp;lt;br&amp;gt; NSYearCalendarUnit =&amp;gt; 1 - 10000&amp;lt;br&amp;gt; NSMonthCalendarUnit = 1 - 12&amp;lt;br&amp;gt; NSDayCalendarUnit = 1 - 31&amp;lt;br&amp;gt; NSH">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-01-24T08:47:17.858Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Calendar相关计算">
+<meta name="twitter:description" content="日历的方法解释1.返回单元的最大范围。就Gregorian来说有:   NSEraCalendarUnit =&amp;gt; 0 - 2&amp;lt;br&amp;gt; NSYearCalendarUnit =&amp;gt; 1 - 10000&amp;lt;br&amp;gt; NSMonthCalendarUnit = 1 - 12&amp;lt;br&amp;gt; NSDayCalendarUnit = 1 - 31&amp;lt;br&amp;gt; NSH">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Calendar" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/01/24/Calendar/" class="article-date">
+  <time datetime="2019-01-24T08:39:14.000Z" itemprop="datePublished">2019-01-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Calendar相关计算
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>日历的方法解释<br><br>1.返回单元的最大范围。就Gregorian来说有:<br></p>
+<blockquote>
+</blockquote>
+<pre><code>NSEraCalendarUnit =&gt; 0 - 2&lt;br&gt;
+NSYearCalendarUnit =&gt; 1 - 10000&lt;br&gt;
+NSMonthCalendarUnit = 1 - 12&lt;br&gt;
+NSDayCalendarUnit = 1 - 31&lt;br&gt;
+NSHourCalendarUnit = 0 - 24&lt;br&gt;
+NSMinuteCalendarUnit = 0 - 60&lt;br&gt;
+NSSecondCalendarUnit = 0 - 60&lt;br&gt;
+NSWeekCalendarUnit = 1 - 53&lt;br&gt;
+NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
+</code></pre><p><strong>- (NSRange)maximumRangeOfUnit:(NSCalendarUnit)unit;</strong></p>
+<p>2.我们大致可以理解为：某个时间点所在的“小单元”，在“大单元”中的位置(从1开始)<br></p>
+<blockquote>
+</blockquote>
+<p>eg:当前时间对应的周是当前年中的第几周<br> [[NSCalendar currentCalendar] ordinalityOfUnit:NSWeekOfYearCalendarUnit inUnit:NSYearCalendarUnit forDate:self];<br><br> [[NSCalendar currentCalendar] ordinalityOfUnit:NSWeekCalendarUnit inUnit:NSYearCalendarUnit forDate:[NSDate date]];<br><br>eg:当前时间对应的周是当前月中的第几周<br>[[NSCalendar currentCalendar] ordinalityOfUnit:NSWeekOfMonthCalendarUnit inUnit:NSYearCalendarUnit forDate:self];<br><br> [[NSCalendar currentCalendar] ordinalityOfUnit:NSWeekCalendarUnit inUnit:NSMonthCalendarUnit forDate:[NSDate date]];<br><br><strong>- (NSUInteger)ordinalityOfUnit:(NSCalendarUnit)smaller inUnit:(NSCalendarUnit)larger forDate:(NSDate *)date;</strong></p>
+<p>3.<br></p>
+<blockquote>
+</blockquote>
+<p>####eg:当前时间对应的月份中有几天<br><br> [[NSCalendar currentCalendar] rangeOfUnit:NSDayCalendarUnit inUnit:NSMonthCalendarUnit forDate:[NSDate date]].length; <br></p>
+<p>####eg:当前时间对应的月份中有几周（前面说到的firstWeekday会影响到这个结果）<br> [[NSCalendar currentCalendar] rangeOfUnit:NSWeekCalendarUnit inUnit:NSMonthCalendarUnit forDate:[NSDate date]].length; <br><br><strong>- (NSRange)rangeOfUnit:(NSCalendarUnit)smaller inUnit:(NSCalendarUnit)larger forDate:(NSDate *)date;</strong></p>
+<p>4.我们大致可以理解为:“某个时间点”所在的“单元”的起始时间,以及起始时间距离“某个时间点”的时差(单位秒)例如:<br></p>
+<blockquote>
+</blockquote>
+<p>NSDate <em>startDateOfYear;<br><br>NSDate </em>startDateOfMonth;<br><br>NSDate <em>startDateOfWeek;<br><br>NSDate </em>startDateOfDay;<br><br>NSTimeInterval TIOfYear;<br><br>NSTimeInterval TIOfMonth;<br><br>NSTimeInterval TIOfWeek;<br><br>NSTimeInterval TIOfDay;<br></p>
+<p>[[NSCalendar currentCalendar] rangeOfUnit:NSYearCalendarUnit startDate:&amp;startDateOfYear interval:&amp;TIOfYear forDate:[NSDate date]];<br><br>[[NSCalendar currentCalendar] rangeOfUnit:NSMonthCalendarUnit startDate:&amp;startDateOfMonth interval:&amp;TIOfMonth forDate:[NSDate date]];<br><br>[[NSCalendar currentCalendar] rangeOfUnit:NSWeekCalendarUnit startDate:&amp;startDateOfWeek interval:&amp;TIOfWeek forDate:[NSDate date]];<br><br>[[NSCalendar currentCalendar] rangeOfUnit:NSDayCalendarUnit startDate:&amp;startDateOfDay interval:&amp;TIOfDay forDate:[NSDate date]];<br><br>NSLog(@”\nfirstDateOfYear:%@, \nFirstDateOfMonth:%@, \nFirstDateOfWeek:%@, \nFirstDateOfDay:%@\n”, startDateOfYear, startDateOfMonth, startDateOfWeek, startDateOfDay);<br><br>NSLog(@”TIOfYear:%f, TIOfMonth:%f, TIOfWeek:%f, TIOfDay:%f”, TIOfYear, TIOfMonth, TIOfWeek, TIOfDay);<br><br><strong>- (BOOL)rangeOfUnit:(NSCalendarUnit)unit startDate:(NSDate <em> _Nullable </em>)datep interval:(NSTimeInterval <em>)tip forDate:(NSDate </em>)date;</strong></p>
+<p>5.返回某个给定的日期是否在一个周末期间,如果startDate和interval均可以计算，则返回YES；否则返回NO<br></p>
+<blockquote>
+</blockquote>
+<p>rangeOfUnit = [calendar rangeOfWeekendStartDate:&amp;dateOut interval:&amp;count containingDate:date];<br><br>if (rangeOfUnit) {<br><br> //得到本地时间，避免时区问题<br><br> NSInteger interval = [calendar.timeZone secondsFromGMTForDate:dateOut];<br><br>NSDate <em>localeDate = [dateOut dateByAddingTimeInterval:interval]; <br><br>NSLog(@”%@”, dateOut); <br><br>NSLog(@”%@”,localeDate); <br><br>NSLog(@”%f”,count); <br><br>}else { <br><br>NSLog(@”无法计算”);<br><br> }<br><br>**- (BOOL)rangeOfWeekendStartDate:(out NSDate </em> _Nullable <em>)datep interval:(out NSTimeInterval </em>)tip containingDate:(NSDate *)date;**</p>
+<p>日历计算</p>
+<blockquote>
+</blockquote>
+<pre><code>- dateByAddingComponents:toDate:options:
+- dateByAddingUnit:value:toDate:options:
+- dateFromComponents:
+- enumerateDatesStartingAfterDate:matchingComponents:options:usingBlock:
+- dateBySettingHour:minute:second:ofDate:options:
+- dateBySettingUnit:value:ofDate:options:
+- dateWithEra:year:month:day:hour:minute:second:nanosecond:
+- dateWithEra:yearForWeekOfYear:weekOfYear:weekday:hour:minute:second:nanosecond:
+- date:matchesComponents:
+- nextDateAfterDate:matchingComponents:options:
+- nextDateAfterDate:matchingHour:minute:second:options:
+- nextDateAfterDate:matchingUnit:value:options:
+- nextWeekendStartDate:interval:options:afterDate:
+- startOfDayForDate:
+</code></pre><ul>
+<li><p>(void)testCalendricalCalculations {<br><br>  NSCalendar <em>calendar = [NSCalendar currentCalendar]; <br><br>  NSDate </em>date = [NSDate date]; <br><br> // 在参数date基础上，增加一个NSDateComponents类型的时间增量<br><br>  NSDateComponents *compt = [[NSDateComponents alloc] init]; <br><br> [compt setHour:1];<br><br> // 增加1小时<br><br>NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                     timeStyle:NSDateFormatterMediumStyle]); <br><br> date = [calendar dateByAddingComponents:compt toDate:date options:0];<br><br>  NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                     timeStyle:NSDateFormatterMediumStyle]);<br></p>
+<p>  // 根据NSCalendarUnit增加一个常量的时间增量<br><br>  date = [calendar dateByAddingUnit:NSCalendarUnitHour value:1 toDate:date options:0]; <br><br> NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                 timeStyle:NSDateFormatterMediumStyle]);<br></p>
+<p>  // NSDateComponents转NSDate<br><br>  date = [calendar dateFromComponents:compt];<br><br>  NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                 timeStyle:NSDateFormatterMediumStyle]); <br></p>
+<p> // 生成当前日期不变，指定时、分、秒的日期 <br><br> date = [NSDate date];<br>  date = [calendar dateBySettingHour:1 minute:3 second:4 ofDate:date options:0];<br>  NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                 timeStyle:NSDateFormatterMediumStyle]);</p>
+<p>  // 根据NSCalendarUnit和设置的值，生成日期<br> date = [calendar dateBySettingUnit:NSCalendarUnitHour value:2 ofDate:date options:0];<br> NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                 timeStyle:NSDateFormatterMediumStyle]);</p>
+<p>  // 根据时代、年、月、日、时、分、秒、毫 生成日期<br>  date = [calendar dateWithEra:1 year:2015 month:10 day:18 hour:15 minute:6 second:8 nanosecond:100];<br>  NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                 timeStyle:NSDateFormatterMediumStyle]);</p>
+<p>  // 根据时代、年、周、星期、时、分、秒、毫 生成NSDate<br> date = [calendar dateWithEra:1 yearForWeekOfYear:2015 weekOfYear:2 weekday:3 hour:1 minute:6 second:8 nanosecond:0];<br> NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterFullStyle                 timeStyle:NSDateFormatterMediumStyle]); </p>
+<p> // 使用指定NSDateComponents匹配指定的NSDate，如果全部匹配成成功，则返回YES，否则No<br> BOOL matchesComponents = [calendar date:date matchesComponents:compt];<br>  NSLog(@”matchesComponents:%d”, matchesComponents); </p>
+<p> // 寻找下一个时间节点，且此节点完全匹配NSDateComponents<br> date = [calendar nextDateAfterDate:date matchingComponents:compt options:NSCalendarMatchNextTime];<br>  NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                 timeStyle:NSDateFormatterMediumStyle]);</p>
+<p>  // 寻找下一个时间点，且匹配指定的时、分、秒<br> date = [calendar nextDateAfterDate:date matchingHour:15 minute:0 second:0 options:NSCalendarMatchNextTime];<br>  NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                 timeStyle:NSDateFormatterMediumStyle]); </p>
+<p> // 寻找下一个时间点，且匹配NSCalendarUnit和指定的值<br> date = [calendar nextDateAfterDate:date matchingUnit:NSCalendarUnitHour value:16 options:NSCalendarMatchNextTime];<br> NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                 timeStyle:NSDateFormatterMediumStyle]);</p>
+<p> // 返回给定日期的当日起始时间<br>  date = [calendar startOfDayForDate:date];<br>  NSLog(@”%@”, [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle                 timeStyle:NSDateFormatterMediumStyle]);<br>}</p>
+</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/01/24/Calendar/" data-id="cjurrl63m0002ub96v5w3zndu" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/01/24/iOS-category不能添加属性探究/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          iOS category不能添加属性探究
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/01/24/GCD的笔记/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">GCD的线程、队列的组合</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/18/指针与结构体/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/03/13/AFURLSessionManager解析/">AFNetwoking之AFURLSessionManager(二)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/20/AFURLRequestSerialization/">AFNetworking之AFURLRequestSerialization(三)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/13/AFHTTPSessionManager/">AFNetworking之AFHTTPSessionManager(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/24/iOS-category不能添加属性探究/">iOS category不能添加属性探究</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

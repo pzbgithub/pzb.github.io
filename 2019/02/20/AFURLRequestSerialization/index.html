@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>AFNetworking之AFURLRequestSerialization(三) | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="AFURLRequestSerializationAFURLRequestSerialization主要是对请求进行编码. 1.基础知识点1.FOUNDATION_EXPORT  .h 文件:     FOUNDATION_EXPORT NSString * const kMyConstantString; .m 文件:     NSString * const kMyConstantString">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AFNetworking之AFURLRequestSerialization(三)">
+<meta property="og:url" content="http://yoursite.com/2019/02/20/AFURLRequestSerialization/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="AFURLRequestSerializationAFURLRequestSerialization主要是对请求进行编码. 1.基础知识点1.FOUNDATION_EXPORT  .h 文件:     FOUNDATION_EXPORT NSString * const kMyConstantString; .m 文件:     NSString * const kMyConstantString">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/737950-ada1782ee2f833c7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/737950-8fb61779bb98248c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-03-26T09:21:27.150Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AFNetworking之AFURLRequestSerialization(三)">
+<meta name="twitter:description" content="AFURLRequestSerializationAFURLRequestSerialization主要是对请求进行编码. 1.基础知识点1.FOUNDATION_EXPORT  .h 文件:     FOUNDATION_EXPORT NSString * const kMyConstantString; .m 文件:     NSString * const kMyConstantString">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/737950-ada1782ee2f833c7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-AFURLRequestSerialization" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/02/20/AFURLRequestSerialization/" class="article-date">
+  <time datetime="2019-02-19T16:00:00.000Z" itemprop="datePublished">2019-02-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      AFNetworking之AFURLRequestSerialization(三)
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="AFURLRequestSerialization"><a href="#AFURLRequestSerialization" class="headerlink" title="AFURLRequestSerialization"></a><center>AFURLRequestSerialization</center></h1><p><strong>AFURLRequestSerialization主要是对请求进行编码.</strong></p>
+<h3 id="1-基础知识点"><a href="#1-基础知识点" class="headerlink" title="1.基础知识点"></a>1.基础知识点</h3><p>1.FOUNDATION_EXPORT </p>
+<pre><code>.h 文件:
+    FOUNDATION_EXPORT NSString * const kMyConstantString;
+.m 文件:
+    NSString * const kMyConstantString = @&quot;Hello&quot;;
+</code></pre><p>2.#define</p>
+<pre><code>#define kMyConstantString @&quot;Hello&quot;
+</code></pre><p>使用第一种方法在检测字符串的值是否相等的时候更快.<br>对于第一种你可以直接使用(stringInstance == MyFirstConstant)来比较;<br>而define则使用的是这种.([stringInstance isEqualToString:MyFirstConstant])</p>
+<p>哪个效率高,显而易见了.<br>第一种直接比较的是指针地址;<br>而第二个则是一一比较字符串的每一个字符是否相等.</p>
+<h3 id="2-AFURLRequestSerialization-h类目录结构"><a href="#2-AFURLRequestSerialization-h类目录结构" class="headerlink" title="2. AFURLRequestSerialization.h类目录结构"></a>2. AFURLRequestSerialization.h类目录结构</h3><p><img src="https://upload-images.jianshu.io/upload_images/737950-ada1782ee2f833c7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图片.png"></p>
+<p>2.1. AFURLRequestSerialization协议 </p>
+<pre><code>AFURLRequestSerialization协议可以被一个编码特定http请求的对象实现。
+请求序列化器（Request serializer）可以编码查询语句、HTTP请求体，如果必须的话，可以自行
+设置合适的HTTP请求体内容（如：Agent:iOS）。
+例如，一个JSON请求序列化器会把请求体Content-Type设置为application/json。
+
+协议方法 :
+/**
+    返回将指定参数编码为原始请求副本的请求。
+
+    @param request 原始请求.
+    @param parameters 要编码的参数.
+    @param error 尝试编码请求参数时发生的错误.
+
+    @return 序列化请求.
+    */
+   - (nullable NSURLRequest *)requestBySerializingRequest:(NSURLRequest *)request
+                                           withParameters:(nullable id)parameters
+                                                    error:(NSError * _Nullable __autoreleasing *)error NS_SWIFT_NOTHROW;
+</code></pre><p>2.2. AFHTTPRequestSerializer类</p>
+<pre><code>1.实现协议&lt;AFURLRequestSerialization&gt;,查询字符串/URL表单编码的参数序列化和默认的请求头，以及响应状态代码和内容类型验证;
+2.属性:
+
+    ------------------------------------------------------------
+
+    /**
+
+     字符串编码方式，默认为NSUTF8StringEncoding
+     */
+    @property (nonatomic, assign) NSStringEncoding stringEncoding;
+
+
+    ------------------------------------------------------------
+
+    /**
+     创建的请求是否可以使用设备的蜂窝无线电（如果存在）。 默认为“是.
+     */
+    @property (nonatomic, assign) BOOL allowsCellularAccess;
+
+
+    ------------------------------------------------------------
+
+
+    /**
+     已创建请求的缓存策略。 默认情况下为“NSURLRequestUseProtocolCachePolicy.
+
+     缓存策略。默认为NSURLRequestUseProtocolCachePolicy
+     */
+    @property (nonatomic, assign) NSURLRequestCachePolicy cachePolicy;
+
+
+    ------------------------------------------------------------
+
+
+    /**
+     创建的请求是否应使用默认的cookie处理。 默认为“是”.
+     是否用cookie来处理创建的请求。默认为YES
+     */
+    @property (nonatomic, assign) BOOL HTTPShouldHandleCookies;
+
+
+    ------------------------------------------------------------
+
+
+    /**
+     创建的请求是否可以在接收来自较早传输的响应之前继续传输数据。 “NO”默认情况下
+
+     创建的请求在收到上个传输（transmission）响应之前是否继续发送数据。
+     默认为NO(即等待上次传输完成后再请求)
+     */
+    @property (nonatomic, assign) BOOL HTTPShouldUsePipelining;
+
+
+    ------------------------------------------------------------
+
+
+    /**
+     已创建请求的网络服务类型。 默认情况下为“NSURLNetworkServiceTypeDefault”.
+
+     请求的网络服务类型。
+     这个服务类型向整个网络传输层次提供了一个关于该请求目的的提示。
+     默认为NSURLNetworkServiceTypeDefault
+     */
+    @property (nonatomic, assign) NSURLRequestNetworkServiceType networkServiceType;
+
+
+    ------------------------------------------------------------
+
+
+    /**
+     请求的超时间隔，单位秒。默认为60秒
+     */
+    @property (nonatomic, assign) NSTimeInterval timeoutInterval;
+
+
+    ------------------------------------------------------------
+
+
+    ///---------------------------------------
+    /// @name Configuring HTTP Request Headers
+    ///---------------------------------------
+
+    ------------------------------------------------------------
+
+    /**
+     序列请求的默认请求头。默认值包括
+     &apos;Accept-Language’  内容为 &apos;NSLocale +preferredLanguages’ 方法获取的语音
+     &apos;User-Agent’  内容为各种bundle的标志已经系统信息
+     可以使用&apos;setValue:forHTTPHeaderField:’方法添加或删除请求头
+     */
+    @property (readonly, nonatomic, strong) NSDictionary &lt;NSString *, NSString *&gt; *HTTPRequestHeaders;
+
+
+    ------------------------------------------------------------
+
+
+3.方法 :
+
+    ------------------------------------------------------------
+
+    /**
+     创建并返回具有默认配置的序列化程序.
+     */
+    + (instancetype)serializer;
+
+    ------------------------------------------------------------
+
+    /**
+     Sets the value for the HTTP headers set in request objects made by the
+      HTTP client. If `nil`, removes the existing value for that header.
+     */
+    - (void)setValue:(nullable NSString *)value forHTTPHeaderField:(NSString 
+      *)field;
+
+
+    ------------------------------------------------------------
+
+    - (nullable NSString *)valueForHTTPHeaderField:(NSString *)field;
+
+
+    ------------------------------------------------------------
+
+    /**
+     将HTTP客户端发出的请求对象中的“授权”HTTP标头集设置为使用Base64编码的用户名和密码的
+     基本认证值。 这会覆盖任何现有值头.
+     */
+    - (void)setAuthorizationHeaderFieldWithUsername:(NSString *)username
+                                           password:(NSString *)password;
+
+
+    ------------------------------------------------------------                                           
+
+
+    /**
+     Clears any existing value for the &quot;Authorization&quot; HTTP header.
+     */
+    - (void)clearAuthorizationHeader;
+
+
+    ------------------------------------------------------------
+
+
+    ///-------------------------------------------------------
+    /// @name Configuring Query String Parameter Serialization
+    ///-------------------------------------------------------
+
+    ------------------------------------------------------------
+
+    /**
+     哪些HTTP请求方法会将参数编码成查询字符串（如:name=xgb&amp;gender=1）。默认为GET, HEAD和DELETE。
+     */
+    @property (nonatomic, strong) NSSet &lt;NSString *&gt; *HTTPMethodsEncodingParametersInURI;
+
+    ------------------------------------------------------------
+
+    // 设置查询字符串序列化的样式,AFNetworking只实现了百分比编码.
+
+    - (void)setQueryStringSerializationWithStyle:(AFHTTPRequestQueryStringSerializationStyle)style;
+
+    ------------------------------------------------------------
+
+    /**
+    可以自定义序列化的方法，这个方法通过这个block来实现,AFNetworking内部查询字符串序列化
+    会调用这个block.
+
+   根据指定的块设置查询字符串序列化的自定义方法.
+     */
+    - (void)setQueryStringSerializationWithBlock:(nullable NSString * (^)(NSURLRequest *request, id parameters, NSError * __autoreleasing *error))block;
+
+
+    -----------------------------------------------------------------------
+
+
+    ///-------------------------------
+    /// @name Creating Request Objects
+    ///-------------------------------
+
+    ------------------------------------------------------------
+
+    /**
+     使用指定的HTTP方法和URL字符串创建`NSMutableURLRequest`对象。
+
+     如果HTTP方法是“GET”，“HEAD”或“DELETE”，则参数将用于构造附加到请求URL的URL编码查
+     询字符串。 否则，参数将根据`parameterEncoding`属性的值进行编码，并设置为请求体.
+     */
+    - (NSMutableURLRequest *)requestWithMethod:(NSString *)method
+                                     URLString:(NSString *)URLString
+                                    parameters:(nullable id)parameters
+                                         error:(NSError * _Nullable 
+                                         __autoreleasing *)error;
+
+
+
+    -----------------------------------------------------------------------
+
+    /**
+     使用指定的HTTP方法和URLString创建一个`NSMutableURLRequest`对象，并使用指定的参
+     数和多部分表单数据块构造一个`multipart / form-data` HTTP主体。 见http://
+     www.w3.org/TR/html4/interact/forms.html#h-17.13.4.2
+
+     多部分表单请求自动流式传输，直接从磁盘读取文件以及单个HTTP正文中的内存数据。 生成的
+     `NSMutableURLRequest`对象具有`HTTPBodyStream`属性，因此不要在此请求对象上设置
+     `HTTPBodyStream`或`HTTPBody`，因为它将清除多部分表单正文流.
+     ⚠️ 上传文件的API，需要通过实现了AFMultipartFormData协议的formData对象处理待上传文件.
+
+     这个方法支持上传数据，值得注意的是之所以能够把本地磁盘或者内存中的数据发送到服务器，是
+     因为NSURLRequest 有两个属性 ： 
+     NSData *HTTPBody;
+     NSInputStream *HTTPBodyStream;
+
+     这个方法是专门处理上传数据的方法，这里就不允许使用GET / HEAD HTTPMethod了。而且会把参数拼到formdata中了.
+     */
+    - (NSMutableURLRequest *)multipartFormRequestWithMethod:(NSString *)method
+                                                  URLString:(NSString *)URLString
+                                                 parameters:(nullable NSDictionary &lt;NSString *, id&gt; *)parameters
+                                  constructingBodyWithBlock:(nullable void (^)(id &lt;AFMultipartFormData&gt; formData))block
+                                                      error:(NSError * _Nullable __autoreleasing *)error;
+
+
+
+    -----------------------------------------------------------------------                                         
+
+    /**
+     通过从请求中删除`HTTPBodyStream`并将其内容异步写入指定文件，在完成时调用完成处理程
+     序来创建`NSMutableURLRequest`.
+
+     @param request The multipart form request. The `HTTPBodyStream` property of `request` must not be `nil`.
+     @param fileURL The file URL to write multipart form contents to.
+     @param handler A handler block to execute.
+
+     @discussion :
+     “NSURLSessionTask”中存在一个错误，该错误会导致请求在从HTTP正文流式传输内容时不发
+     送“Content-Length”标头，这在与Amazon S3 Web服务进行交互时尤其有问题。 作为一种变
+     通方法，此方法接受使用`multipartFormRequestWithMethod构造的请求：URLString：
+     parameters：constructBodyWithBlock：error：`或带有`HTTPBodyStream`的任何其
+     他请求，将内容写入指定文件并返回原始请求的副本 `HTTPBodyStream`属性设置为`nil`。 
+     从这里，文件可以传递给`AFURLSessionManager -uploadTaskWithRequest：
+     fromFile：progress：completionHandler：`，或者将其内容读入分配给请求的
+     `HTTPBody`属性的`NSData`中.
+
+     这个方法可以说是一个关于使用NSInputStream和NSOutputSteam 的经典案例，用法可以记下来或拿这个方法的代码做参考.
+     */
+    - (NSMutableURLRequest *)requestWithMultipartFormRequest:(NSURLRequest *)request
+                                 writingStreamContentsToFile:(NSURL *)fileURL
+                                           completionHandler:(nullable void (^)(NSError * _Nullable error))handler;
+</code></pre><p>2.3.AFMultipartFormData协议</p>
+<pre><code>1.说明 :
+ `AFMultipartFormData`协议定义了参数&apos;AFHTTPRequestSerializer 
+ -multipartFormRequestWithMethod：URLString：parameters：constructBodyWithBlock：`中的参数所支持的方法.
+
+ 2.api :
+
+     -----------------------------------------------------------------------
+
+    /**
+    追加HTTP标头`Content-Disposition：file; filename =＃{generated filename};
+    name =＃{name}“`和`Content-Type：＃{generated mimeType}`，后跟编码文件数据和
+   多部分表格边界。
+
+    将使用`fileURL`的最后一个路径组件和`fileURL`扩展名的系统关联MIME类型自动生成表单中
+    此数据的文件名和MIME类型. 
+      ⚠️ 通过URL定位待上传文件
+     */
+    - (BOOL)appendPartWithFileURL:(NSURL *)fileURL
+                             name:(NSString *)name
+                            error:(NSError * _Nullable __autoreleasing 
+                            *)error;
+
+
+    -----------------------------------------------------------------------
+
+    /**
+     追加HTTP标头`Content-Disposition：file;文件名=＃{文件名}; name =＃{name}“`和
+     `Content-Type：＃{mimeType}`，后跟编码文件数据和多部分表格边界。
+
+        @param fileURL与其内容将附加到表单的文件对应的URL。 此参数不能为“nil”。
+        @param name与指定数据关联的名称。 此参数不能为“nil”。
+        @param fileName要在`Content-Disposition`标头中使用的文件名。 此参数不能
+               为“nil”。
+        @param mimeType文件数据的声明MIME类型。 此参数不能为“nil”。
+        @param error如果发生错误，返回时包含一个描述问题的`NSError`对象
+     */
+    - (BOOL)appendPartWithFileURL:(NSURL *)fileURL
+                             name:(NSString *)name
+                         fileName:(NSString *)fileName
+                         mimeType:(NSString *)mimeType
+                            error:(NSError * _Nullable __autoreleasing 
+                            *)error;
+
+
+    -----------------------------------------------------------------------
+
+    /**
+     追加HTTP标头`Content-Disposition：file;文件名=＃{文件名}; name =＃{name}“`和
+     `Content-Type：＃{mimeType}`，后跟输入流和多部分表格边界的数据。
+
+    @param inputStream要附加到表单数据的输入流
+    @param name与指定输入流关联的名称。 此参数不能为“nil”。
+    @param fileName与指定输入流关联的文件名。 此参数不能为“nil”。
+    @param length指定输入流的长度（以字节为单位）。
+    @param mimeType指定数据的MIME类型。 （例如，JPEG图像的MIME类型是image / 
+    jpeg。）有关有效MIME类型的列表，请参阅http://www.iana.org/assignments/media-
+    types/。 此参数不能为“nil”.
+
+      ⚠️ 通过NSInputStream定义待上传文件
+     */
+    - (void)appendPartWithInputStream:(nullable NSInputStream *)inputStream
+                                 name:(NSString *)name
+                             fileName:(NSString *)fileName
+                               length:(int64_t)length
+                             mimeType:(NSString *)mimeType;
+
+
+    -----------------------------------------------------------------------
+
+
+    /**
+     追加HTTP标头`Content-Disposition：file;文件名=＃{文件名}; name =＃{name}“`和
+     `Content-Type：＃{mimeType}`，后跟编码文件数据和多部分表格边界。
+
+    @param data要编码并附加到表单数据的数据。
+    @param name与指定数据关联的名称。 此参数不能为“nil”。
+    @param fileName与指定数据关联的文件名。 此参数不能为“nil”。
+    @param mimeType指定数据的MIME类型。 （例如，JPEG图像的MIME类型是image / 
+    jpeg。）有关有效MIME类型的列表，请参阅http://www.iana.org/assignments/media-
+    types/。 此参数不能为“nil”。
+
+      ⚠️ 通过NSData数据上传
+     */
+    - (void)appendPartWithFileData:(NSData *)data
+                              name:(NSString *)name
+                          fileName:(NSString *)fileName
+                          mimeType:(NSString *)mimeType;
+
+
+    -----------------------------------------------------------------------
+
+    /**
+     追加HTTP标头`Content-Disposition：form-data; name =＃{name}“`，后跟编码数据
+     和多部分表格边界。
+
+    @param data要编码并附加到表单数据的数据。
+    @param name与指定数据关联的名称。 此参数不能为“nil”。
+     */
+
+    - (void)appendPartWithFormData:(NSData *)data
+                              name:(NSString *)name;
+
+
+    -----------------------------------------------------------------------
+
+
+    /**
+     附加HTTP标头，后跟编码数据和多部分表单边界。
+
+    @param headers要附加到表单数据的HTTP标头。
+    @param body要编码并附加到表单数据的数据。 此参数不能为“nil”。
+             */
+    - (void)appendPartWithHeaders:(nullable NSDictionary &lt;NSString *, NSString *&gt; *)headers
+                                     body:(NSData *)body;
+
+
+    -----------------------------------------------------------------------
+
+
+    /**
+     Throttles通过限制数据包大小并为从上载流读取的每个块添加延迟来请求带宽。
+
+    通过3G或EDGE连接上传时，请求可能会因“请求正文流耗尽”而失败。根据建议值
+    （`kAFUploadStream3GSuggestedPacketSize`和 
+    `kAFUploadStream3GSuggestedDelay`）设置最大数据包大小和延迟会降低输入流超过其分
+    配带宽的风险。不幸的是，没有明确的方法来区分“NSURLConnection”上的3G，EDGE或LTE连
+    接。因此，建议您不要仅根据网络可达性来限制带宽。相反，您应该考虑在故障块中检查“请求主体
+    流耗尽”，然后使用限制带宽重试请求。
+
+    @param numberOfBytes最大包大小，以字节数表示。输入流的默认数据包大小为16kb。
+    @param delay每次读取数据包时的延迟时间。默认情况下，不设置延迟.
+     */
+    - (void)throttleBandwidthWithPacketSize:(NSUInteger)numberOfBytes
+                                      delay:(NSTimeInterval)delay;
+</code></pre><p>2.4. AFJSONRequestSerializer</p>
+<pre><code>1.继承 : &lt;AFHTTPRequestSerializer&gt;,是AFHTTPRequestSerializer的一个子类, 将
+        parameters参数使用NSJSONSerialization序列化为JSON, 并且设置Content-Type  
+        为application/json.
+2.属性 :
+
+    // 属性列表格式。 可能的值在“NSPropertyListFormat”中描述.
+    @property (nonatomic, assign) NSPropertyListFormat format;
+
+
+    /**
+     @warning @warning“writeOptions”属性当前未使用.
+     */
+    @property (nonatomic, assign) NSPropertyListWriteOptions writeOptions;
+
+3.api :
+
+    /**
+     创建并返回具有指定格式，读取选项和写入选项的属性列表序列化程序。
+
+    @param format属性列表格式。
+    @param writeOptions属性列表写入选项。
+
+    @warning“writeOptions”属性当前未使用.
+     */
+    + (instancetype)serializerWithFormat:(NSPropertyListFormat)format
+                            writeOptions:(NSPropertyListWriteOptions)writeOptions;
+</code></pre><p>2.5. AFPropertyListRequestSerializer</p>
+<pre><code>1.继承 : &lt;AFHTTPRequestSerializer&gt;,是AFHTTPRequestSerializer的一个子类, 将
+        parameters参数使用NSPropertyListSerializer序列化为JSON, 并且设置Content-  
+        Type为application/x-plist.
+2.属性 :
+
+    //  属性列表格式。 可能的值在“NSPropertyListFormat”中描述.
+    @property (nonatomic, assign) NSPropertyListFormat format;
+
+
+
+    //  @warning“writeOptions”属性当前未使用
+    @property (nonatomic, assign) NSPropertyListWriteOptions writeOptions;
+
+3.api :
+
+    /**
+     创建并返回具有指定格式，读取选项和写入选项的属性列表序列化程序。
+
+    @param format属性列表格式。
+    @param writeOptions属性列表写入选项。
+
+    @warning“writeOptions”属性当前未使用.
+     */
+    + (instancetype)serializerWithFormat:(NSPropertyListFormat)format
+                            writeOptions:(NSPropertyListWriteOptions)writeOptions;
+</code></pre><p>2.6. Constants</p>
+<pre><code>------------------------------------------------------------
+
+/**
+ ## Error Domains
+
+ 以下错误域是预定义的。
+
+ - `NSString * const AFURLRequestSerializationErrorDomain`
+
+###常量
+
+`AFURLRequestSerializationErrorDomain`
+AFURLRequestSerializer错误。
+
+ `AFURLRequestSerializationErrorDomain`的错误代
+码对应于`NSURLErrorDomain`中的代码.
+ */
+FOUNDATION_EXPORT NSString * const AFURLRequestSerializationErrorDomain;
+
+
+------------------------------------------------------------
+
+/**
+ ##用户信息字典键
+
+除了为NSError定义的密钥之外，这些密钥可能存在于用户信息字典中。
+
+ - `NSString * const AFNetworkingOperationFailingURLRequestErrorKey`
+
+###常量
+
+`AFNetworkingOperationFailingURLRequestErrorKey`
+相应的值是一个`NSURLRequest`，它包含与错误相关的操作请求。
+ 该键仅出现在`AFURLRequestSerializationErrorDomain`中.
+ */
+FOUNDATION_EXPORT NSString * const AFNetworkingOperationFailingURLRequestErrorKey;
+
+
+------------------------------------------------------------
+
+/**
+ ##限制HTTP请求输入流的带宽
+
+@see -throttleBandwidthWithPacketSize：延迟：
+
+###常量
+
+`kAFUploadStream3GSuggestedPacketSize`
+最大数据包大小，以字节数表示。 等于16kb。
+
+`kAFUploadStream3GSuggestedDelay`
+每次读取数据包时的延迟持续时间。 等于0.2秒.
+ */
+FOUNDATION_EXPORT NSUInteger const kAFUploadStream3GSuggestedPacketSize;
+FOUNDATION_EXPORT NSTimeInterval const kAFUploadStream3GSuggestedDelay;
+</code></pre><h3 id="3-AFURLRequestSerialization-m实现解析"><a href="#3-AFURLRequestSerialization-m实现解析" class="headerlink" title="3. AFURLRequestSerialization.m实现解析"></a>3. AFURLRequestSerialization.m实现解析</h3><h5 id="3-1-AFPercentEscapedStringFromString全局方法"><a href="#3-1-AFPercentEscapedStringFromString全局方法" class="headerlink" title="3.1. AFPercentEscapedStringFromString全局方法"></a>3.1. AFPercentEscapedStringFromString全局方法</h5><pre><code>URL为何需要编码(摘自RFC 3986)?
+
+    通常如果一样东西需要编码，说明这样东西并不适合传输。原因多种多样，如Size过大，包含隐私 
+    数据，对于Url来说，之所以要进行编码，是因为Url中有些字符会引起歧义。
+
+    例如Url参数字符串中使用key=value键值对这样的形式来传参，键值对之间以&amp;符号分隔，如/s?
+    q=abc&amp;ie=utf-8。如果你的value字符串中包含了=或者&amp;，那么势必会造成接收Url的服务器解
+    析错误，因此必须将引起歧义的&amp;和=符号进行转义，也就是对其进行编码。
+
+    又如，Url的编码格式采用的是ASCII码，而不是Unicode，这也就是说你不能在Url中包含任何非
+    ASCII字符，例如中文。否则如果客户端浏览器和服务端浏览器支持的字符集不同的情况下，中文
+    可能会造成问题。
+
+    Url编码的原则就是使用安全的字符（没有特殊用途或者特殊意义的可打印字符）去表示那些不安全
+    的字符。
+
+    预备知识：URI是统一资源标识的意思，通常我们所说的Url只是URI的一种。典型Url的格式如上
+            面所示。下面提到的Url编码，实际上应该指的是URI编码。
+</code></pre><p><img src="https://upload-images.jianshu.io/upload_images/737950-8fb61779bb98248c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图片.png"></p>
+<pre><code>哪些字符需要编码？
+RFC3986文档规定，Url中只允许包含英文字母（a-zA-Z）、数字（0-9）、-_.~4个特殊字符以及所
+有保留字符。RFC3986文档对Url的编解码问题做出了详细的建议，指出了哪些字符需要被编码才不会
+引起Url语义的转变，以及对为什么这些字符需要编码做出了相应的解释。
+
+US-ASCII字符集中没有对应的可打印字符：Url中只允许使用可打印字符。US-ASCII码中的10-7F字
+节全都表示控制字符，这些字符都不能直接出现在Url中。同时，对于80-FF字节（ISO-8859-1），由
+于已经超出了US-ACII定义的字节范围，因此也不可以放在Url中。
+
+保留字符：Url可以划分成若干个组件，协议、主机、路径等。有一些字符（:/?#[]@）是用作分隔不
+同组件的。例如:冒号用于分隔协议和主机，/用于分隔主机和路径，?用于分隔路径和查询参数，等等。
+还有一些字符（!$&amp;&apos;()*+,;=）用于在每个组件中起到分隔作用的，如=用于表示查询参数中的键值
+对，&amp;符号用于分隔查询多个键值对。当组件中的普通数据包含这些特殊字符时，需要对其进行编码。
+
+RFC3986中指定了以下字符为保留字符：! * &apos; ( ) ; : @ &amp; = + $ , / ? # [ ]
+
+不安全字符：还有一些字符，当他们直接放在Url中的时候，可能会引起解析程序的歧义。这些字符被视
+为不安全字符，原因有很多。
+
+    1.空格：Url在传输的过程，或者用户在排版的过程，或者文本处理程序在处理Url的过程，都有 
+           可能引入无关紧要的空格，或者将那些有意义的空格给去掉;
+
+    2.引号以及&lt;&gt;: 引号和尖括号通常用于在普通文本中起到分隔Url的作用;
+
+    3.#: 通常用于表示书签或者锚点;
+
+    4.%: 百分号本身用作对不安全字符进行编码时使用的特殊字符，因此本身需要编码;
+
+    5.{}|\^[]`~: 某一些网关或者传输代理会篡改这些字符;
+
+
+如何对Url中的非法字符进行编码?
+Url编码通常也被称为百分号编码（Url Encoding，also known as percent-encoding），是
+因为它的编码方式非常简单，使用%百分号加上两位的字符——0123456789ABCDEF——代表一个字节的十
+六进制形式。Url编码默认使用的字符集是US-ASCII。例如a在US-ASCII码中对应的字节是0x61，那
+么Url编码之后得到的就是%61，我们在地址栏上输入http://g.cn/search?q=%61%62%63，实际上
+就等同于在google上搜索abc了。又如@符号在ASCII字符集中对应的字节为0x40，经过Url编码之后
+得到的是%40。
+
+对于非ASCII字符，需要使用ASCII字符集的超集进行编码得到相应的字节，然后对每个字节执行百分
+号编码。对于Unicode字符，RFC文档建议使用utf-8对其进行编码得到相应的字节，然后对每个字节
+执行百分号编码。如&quot;中文&quot;使用UTF-8字符集得到的字节为0xE4 0xB8 0xAD 0xE6 0x96 0x87，经
+过Url编码之后得到&quot;%E4%B8%AD%E6%96%87&quot;。
+
+如果某个字节对应着ASCII字符集中的某个非保留字符，则此字节无需使用百分号表示。例如&quot;Url编
+码&quot;，使用UTF-8编码得到的字节是0x55 0x72 0x6C 0xE7 0xBC 0x96 0xE7 0xA0 0x81，由于
+前三个字节对应着ASCII中的非保留字符&quot;Url&quot;，因此这三个字节可以用非保留字符&quot;Url&quot;表示。最终
+的Url编码可以简化成&quot;Url%E7%BC%96%E7%A0%81&quot; ，当然，如果你
+用&quot;%55%72%6C%E7%BC%96%E7%A0%81&quot;也是可以的。
+
+
+---------------------------------------------------------------------
+AFPercentEscapedStringFromString : 返回一个字符串的百分号编码格式的字符串。
+
+
+NSString * AFPercentEscapedStringFromString(NSString *string) {
+    static NSString * const kAFCharactersGeneralDelimitersToEncode = @&quot;:#[]@&quot;; // does not include &quot;?&quot; or &quot;/&quot; due to RFC 3986 - Section 3.4
+    static NSString * const kAFCharactersSubDelimitersToEncode = @&quot;!$&amp;&apos;()*+,;=&quot;;
+
+    NSMutableCharacterSet * allowedCharacterSet = [[NSCharacterSet URLQueryAllowedCharacterSet] mutableCopy];
+    [allowedCharacterSet removeCharactersInString:[kAFCharactersGeneralDelimitersToEncode stringByAppendingString:kAFCharactersSubDelimitersToEncode]];
+
+    static NSUInteger const batchSize = 50;
+
+    NSUInteger index = 0;
+    NSMutableString *escaped = @&quot;&quot;.mutableCopy;
+
+    while (index &lt; string.length) {
+        NSUInteger length = MIN(string.length - index, batchSize);
+        NSRange range = NSMakeRange(index, length);
+
+        range = [string rangeOfComposedCharacterSequencesForRange:range];
+
+        NSString *substring = [string substringWithRange:range];
+        NSString *encoded = [substring stringByAddingPercentEncodingWithAllowedCharacters:allowedCharacterSet];
+        [escaped appendString:encoded];
+
+        index += range.length;
+    }
+
+    return escaped;
+}
+</code></pre><h5 id="3-2-AFHTTPRequestSerializer类解析"><a href="#3-2-AFHTTPRequestSerializer类解析" class="headerlink" title="3.2. AFHTTPRequestSerializer类解析"></a>3.2. AFHTTPRequestSerializer类解析</h5><pre><code>AFHTTPRequestSerializer主要实现了大部分request拼接转化功能。比如通用请求头的添加如
+userAgent、request属性的KVO观察、手动指定请求头序列化的Block、负责具体的request对象的
+初始化等。
+
+1.属性 :
+/**
+ 保存用户修改过的属性，包括AFHTTPRequestSerializerObservedKeyPaths包含的属性。
+ 当用户修改这些属性值时记录起来，创建Request时使用，没修改的使用默认值。
+ */
+@property (readwrite, nonatomic, strong) NSMutableSet *mutableObservedChangedKeyPaths;
+
+
+/**
+ 真正存储Header的属性
+ */
+@property (readwrite, nonatomic, strong) NSMutableDictionary *mutableHTTPRequestHeaders;
+
+
+/**
+ 用一个串行线程来统一处理Header的修改，避免多线程造成的线程安全问题。
+ */
+@property (readwrite, nonatomic, strong) dispatch_queue_t requestHeaderModificationQueue;
+
+
+/**
+ 目前还没啥用的属性
+ */
+@property (readwrite, nonatomic, assign) AFHTTPRequestQueryStringSerializationStyle queryStringSerializationStyle;
+
+
+/**
+ 用于自定义查询字符串的拼接。
+ 因为AFURLRequestSerialization协议定义的方法-requestBySerializingRequest:withParameters:error:
+ 传入的parameters是以字典的形式传入，所以需要将字典拼接成查询字符串，默认是使用AFQueryStringFromParameters方法拼接。
+ */
+@property (readwrite, nonatomic, copy) AFQueryStringSerializationBlock queryStringSerialization;
+
+
+2.初始化方法 :
+- (instancetype)init {
+    self = [super init];
+    if (!self) {
+        return nil;
+    }
+
+    self.stringEncoding = NSUTF8StringEncoding;
+
+    //  请求的头部信息字典
+    //  mutableHTTPRequestHeaders保存了我们修改的请求头的信息, 当对请求头做修改时会在requestHeaderModificationQueue并行队列中执行, 将修改的信息保存在mutableHTTPRequestHeaders字典中, 在调用requestBySerializingRequest对请求编码的时候遍历这个字典, 给request设置header.
+
+    self.mutableHTTPRequestHeaders = [NSMutableDictionary dictionary];
+    self.requestHeaderModificationQueue = dispatch_queue_create(&quot;requestHeaderModificationQueue&quot;, DISPATCH_QUEUE_CONCURRENT);
+
+    // Accept-Language HTTP Header; see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.4
+    //  设置头部中请求的自然语言列表
+    NSMutableArray *acceptLanguagesComponents = [NSMutableArray array];
+    [[NSLocale preferredLanguages] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        float q = 1.0f - (idx * 0.1f);
+        [acceptLanguagesComponents addObject:[NSString stringWithFormat:@&quot;%@;q=%0.1g&quot;, obj, q]];
+        *stop = q &lt;= 0.5f;
+    }];
+    [self setValue:[acceptLanguagesComponents componentsJoinedByString:@&quot;, &quot;] forHTTPHeaderField:@&quot;Accept-Language&quot;];
+
+//    设置User-Agent请求头域的值
+    NSString *userAgent = nil;
+#if TARGET_OS_IOS
+    // User-Agent Header; see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.43
+    userAgent = [NSString stringWithFormat:@&quot;%@/%@ (%@; iOS %@; Scale/%0.2f)&quot;, [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleExecutableKey] ?: [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleIdentifierKey], [[NSBundle mainBundle] infoDictionary][@&quot;CFBundleShortVersionString&quot;] ?: [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleVersionKey], [[UIDevice currentDevice] model], [[UIDevice currentDevice] systemVersion], [[UIScreen mainScreen] scale]];
+#elif TARGET_OS_WATCH
+    // User-Agent Header; see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.43
+    userAgent = [NSString stringWithFormat:@&quot;%@/%@ (%@; watchOS %@; Scale/%0.2f)&quot;, [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleExecutableKey] ?: [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleIdentifierKey], [[NSBundle mainBundle] infoDictionary][@&quot;CFBundleShortVersionString&quot;] ?: [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleVersionKey], [[WKInterfaceDevice currentDevice] model], [[WKInterfaceDevice currentDevice] systemVersion], [[WKInterfaceDevice currentDevice] screenScale]];
+#elif defined(__MAC_OS_X_VERSION_MIN_REQUIRED)
+    userAgent = [NSString stringWithFormat:@&quot;%@/%@ (Mac OS X %@)&quot;, [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleExecutableKey] ?: [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleIdentifierKey], [[NSBundle mainBundle] infoDictionary][@&quot;CFBundleShortVersionString&quot;] ?: [[NSBundle mainBundle] infoDictionary][(__bridge NSString *)kCFBundleVersionKey], [[NSProcessInfo processInfo] operatingSystemVersionString]];
+#endif
+    if (userAgent) {
+
+     /*
+     *如果userAgent里面包含非ASCII码的字符，比如中文，则需要转换。这里是转换为对应的拉
+      丁字母。
+      AFNetWorking3.X源码阅读/1.0 (iPhone; iOS 10.2; Scale/2.00)
+     */
+        if (![userAgent canBeConvertedToEncoding:NSASCIIStringEncoding]) {
+            NSMutableString *mutableUserAgent = [userAgent mutableCopy];
+
+            // 转换为拉丁字母
+            if (CFStringTransform((__bridge CFMutableStringRef)(mutableUserAgent), NULL, (__bridge CFStringRef)@&quot;Any-Latin; Latin-ASCII; [:^ASCII:] Remove&quot;, false)) {
+                userAgent = mutableUserAgent;
+            }
+        }
+        [self setValue:userAgent forHTTPHeaderField:@&quot;User-Agent&quot;];
+    }
+
+    // HTTP Method Definitions; see http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html
+    self.HTTPMethodsEncodingParametersInURI = [NSSet setWithObjects:@&quot;GET&quot;, @&quot;HEAD&quot;, @&quot;DELETE&quot;, nil];
+
+    //  kvo的方式监听allowsCellularAccess，cachePolicy，HTTPShouldHandleCookies，HTTPShouldUsePipelining，networkServiceType，timeoutInterval的属性的变化
+    self.mutableObservedChangedKeyPaths = [NSMutableSet set];
+    //  通过AFHTTPRequestSerializerObservedKeyPaths函数获取AFN监听哪些头部字段的变化, 并且提供监听方法, 在监听方法中如果有值改变, 就赋值给mutableHTTPRequestHeaders字典.
+    for (NSString *keyPath in AFHTTPRequestSerializerObservedKeyPaths()) {
+        if ([self respondsToSelector:NSSelectorFromString(keyPath)]) {
+            [self addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionNew context:AFHTTPRequestSerializerObserverContext];
+        }
+    }
+
+    return self;
+}
+
+3. AFHTTPRequestSerializer的各种setter方法
+
+    首先通过automaticallyNotifiesObserversForKey方法来阻止一些属性的KVO机制的触发，
+    然后我们通过重写蜂窝数据、缓存策略、cookie、管道、网络状态、超时的观察.
+
+    /**
+     如果kvo的触发机制是默认触发。则返回true，否则返回false。在这里，只要是
+     `AFHTTPRequestSerializerObservedKeyPaths`里面的属性，我们都取消自动触发kvo机
+     制，使用手动触发。
+
+     @param key kvo的key
+     @return bool值
+     */
+    + (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key {
+        if ([AFHTTPRequestSerializerObservedKeyPaths() containsObject:key]) {
+            return NO;
+        }
+        return [super automaticallyNotifiesObserversForKey:key];
+    }
+
+    - (void)observeValueForKeyPath:(NSString *)keyPath
+                          ofObject:(__unused id)object
+                            change:(NSDictionary *)change
+                           context:(void *)context
+    {
+        //是否是选择要观察的属性
+        if (context == AFHTTPRequestSerializerObserverContext) {
+            //如果属性值为null，则表示没有这个属性，移除对其的观察
+            if ([change[NSKeyValueChangeNewKey] isEqual:[NSNull null]]) {
+                [self.mutableObservedChangedKeyPaths removeObject:keyPath];
+            } else {
+                //添加到要观察的属性的集合
+                [self.mutableObservedChangedKeyPaths addObject:keyPath];
+            }
+        }
+    }
+
+
+    通过重写属性的setter方法来手动触发kvo:
+    #pragma mark - 手动触发蜂窝数据、缓存策略、cookie、管道、网络状态、超时的观察。
+    - (void)setAllowsCellularAccess:(BOOL)allowsCellularAccess {
+        [self willChangeValueForKey:NSStringFromSelector(@selector(allowsCellularAccess))];
+        _allowsCellularAccess = allowsCellularAccess;
+        [self didChangeValueForKey:NSStringFromSelector(@selector(allowsCellularAccess))];
+    }
+
+    - (void)setCachePolicy:(NSURLRequestCachePolicy)cachePolicy {
+        [self willChangeValueForKey:NSStringFromSelector(@selector(cachePolicy))];
+        _cachePolicy = cachePolicy;
+        [self didChangeValueForKey:NSStringFromSelector(@selector(cachePolicy))];
+    }
+
+    - (void)setHTTPShouldHandleCookies:(BOOL)HTTPShouldHandleCookies {
+        [self willChangeValueForKey:NSStringFromSelector(@selector(HTTPShouldHandleCookies))];
+        _HTTPShouldHandleCookies = HTTPShouldHandleCookies;
+        [self didChangeValueForKey:NSStringFromSelector(@selector(HTTPShouldHandleCookies))];
+    }
+
+    - (void)setHTTPShouldUsePipelining:(BOOL)HTTPShouldUsePipelining {
+        [self willChangeValueForKey:NSStringFromSelector(@selector(HTTPShouldUsePipelining))];
+        _HTTPShouldUsePipelining = HTTPShouldUsePipelining;
+        [self didChangeValueForKey:NSStringFromSelector(@selector(HTTPShouldUsePipelining))];
+    }
+
+    - (void)setNetworkServiceType:(NSURLRequestNetworkServiceType)networkServiceType {
+        [self willChangeValueForKey:NSStringFromSelector(@selector(networkServiceType))];
+        _networkServiceType = networkServiceType;
+        [self didChangeValueForKey:NSStringFromSelector(@selector(networkServiceType))];
+    }
+
+    - (void)setTimeoutInterval:(NSTimeInterval)timeoutInterval {
+        [self willChangeValueForKey:NSStringFromSelector(@selector(timeoutInterval))];
+        _timeoutInterval = timeoutInterval;
+        [self didChangeValueForKey:NSStringFromSelector(@selector(timeoutInterval))];
+    }
+
+
+4. AFHTTPRequestSerializer的各种请求头域处理方法
+
+    /**
+     返回请求头域key和vaue
+
+     @return 字典
+     */
+    - (NSDictionary *)HTTPRequestHeaders {
+        NSDictionary __block *value;
+        dispatch_sync(self.requestHeaderModificationQueue, ^{
+            value = [NSDictionary dictionaryWithDictionary:self.mutableHTTPRequestHeaders];
+        });
+        return value;
+    }
+
+
+    /**
+     设置一个请求头域
+
+     @param value vaue
+     @param field 域名
+     */
+    - (void)setValue:(NSString *)value
+    forHTTPHeaderField:(NSString *)field
+    {
+         /*  dispatch_barrier_sync 和 dispatch_barrier_async的共同点：
+         *  1.等待在它前面插入队列的任务先执行完;
+         *  2.等待他们自己的任务执行完再执行后面的任务;
+         *
+         *  dispatch_barrier_sync 和 dispatch_barrier_async的非共同点：
+         *  1.dispatch_barrier_sync将自己的任务插入到队列的时候，需要等待自己的任务结
+         *    束之后才会继续插入被写在它后面的任务，然后执行它们;
+         *    
+         *  2.dispatch_barrier_async将自己的任务插入到队列之后，不会等待自己的任务结
+         *    束，它会继续把后面的任务插入到队列，然后等待自己的任务结束后才执行后面任
+         *    务。
+         *
+         *  所以，dispatch_barrier_async的不等待（异步）特性体现在将任务插入队列的过
+         *  程，它的等待特性体现在任务真正执行的过程。
+         */
+        dispatch_barrier_async(self.requestHeaderModificationQueue, ^{
+            [self.mutableHTTPRequestHeaders setValue:value forKey:field];
+        });
+    }
+
+
+    /**
+     返回指定请求头域的值
+
+     @param field 域名
+     @return 值
+     */
+    - (NSString *)valueForHTTPHeaderField:(NSString *)field {
+        NSString __block *value;
+        dispatch_sync(self.requestHeaderModificationQueue, ^{
+            value = [self.mutableHTTPRequestHeaders valueForKey:field];
+        });
+        return value;
+    }
+
+
+    /**
+     设置Basic Authorization的用户名和密码。记住需要是base64编码格式的。
+     @param username 用户
+     @param password 密码
+     */
+    - (void)setAuthorizationHeaderFieldWithUsername:(NSString *)username
+                                           password:(NSString *)password
+    {
+        NSData *basicAuthCredentials = [[NSString stringWithFormat:@&quot;%@:%@&quot;, username, password] dataUsingEncoding:NSUTF8StringEncoding];
+        NSString *base64AuthCredentials = [basicAuthCredentials base64EncodedStringWithOptions:(NSDataBase64EncodingOptions)0];
+        [self setValue:[NSString stringWithFormat:@&quot;Basic %@&quot;, base64AuthCredentials] forHTTPHeaderField:@&quot;Authorization&quot;];
+    }
+
+
+    /**
+     移除Basic Authorization的请求头
+     */
+    - (void)clearAuthorizationHeader {
+        dispatch_barrier_async(self.requestHeaderModificationQueue, ^{
+            [self.mutableHTTPRequestHeaders removeObjectForKey:@&quot;Authorization&quot;];
+        });
+    }
+
+5. AFHTTPRequestSerializer的各种创建NSMutableURLRequest的方法:
+
+    通过下面这三种方法处理不同类型的request对象的初始化和参数序列化。
+
+    /**
+     根据给定的url、方法名、参数构建一个request。
+
+     @param method 方法名
+     @param URLString url地址
+     @param parameters 参数，根据不同的请求方法构建出不同的模式
+     @param error 构建出错
+     @return 返回一个非multipartForm请求
+     */
+    - (NSMutableURLRequest *)requestWithMethod:(NSString *)method
+                                     URLString:(NSString *)URLString
+                                    parameters:(id)parameters
+                                         error:(NSError *__autoreleasing *)error
+    {
+        NSParameterAssert(method);
+        NSParameterAssert(URLString);
+        NSURL *url = [NSURL URLWithString:URLString];
+        NSParameterAssert(url);
+        NSMutableURLRequest *mutableRequest = [[NSMutableURLRequest alloc] initWithURL:url];
+        mutableRequest.HTTPMethod = method;
+        /*
+         *mutableObservedChangedKeyPaths集合里面的属性都通过`setValue: forKey`手动设置一下。估计目的是触发这几个属性的kvo。
+         */
+        for (NSString *keyPath in AFHTTPRequestSerializerObservedKeyPaths()) {
+            if ([self.mutableObservedChangedKeyPaths containsObject:keyPath]) {
+                [mutableRequest setValue:[self valueForKeyPath:keyPath] forKey:keyPath];
+            }
+        }
+
+        /*
+         根据parameters和HTTPRequestHeaders构建一个request
+         */
+        mutableRequest = [[self requestBySerializingRequest:mutableRequest withParameters:parameters error:error] mutableCopy];
+        return mutableRequest;
+    }
+
+
+
+    /**
+     构建一个multipartForm的request。并且通过`AFMultipartFormData`类型的formData来构建请求体
+
+     @param method 方法名，一般都是POST
+     @param URLString 请求地址
+     @param parameters 请求头参数
+     @param block 用于构建请求体的Block
+     @param error 构建请求体出错
+     @return 返回一个构建好的request
+     */
+    - (NSMutableURLRequest *)multipartFormRequestWithMethod:(NSString *)method
+                                                  URLString:(NSString *)URLString
+                                                 parameters:(NSDictionary *)parameters
+                                  constructingBodyWithBlock:(void (^)(id &lt;AFMultipartFormData&gt; formData))block
+                                                      error:(NSError *__autoreleasing *)error
+    {
+        NSParameterAssert(method);
+        NSParameterAssert(![method isEqualToString:@&quot;GET&quot;] &amp;&amp; ![method isEqualToString:@&quot;HEAD&quot;]);
+        /*
+         先构建一个普通的request对象，然后在构建出multipartFrom的request
+         * 在这一步将会把parameters加入请求头或者请求体。然后把`AFURLRequestSerialization`指定的headers加入request的请求头中。这个request就只差构建multipartFrom部分了
+         */
+        NSMutableURLRequest *mutableRequest = [self requestWithMethod:method URLString:URLString parameters:nil error:error];
+        /*
+         *初始化一个`AFStreamingMultipartFormData`对象。用于封装multipartFrom的body部分
+         */
+        __block AFStreamingMultipartFormData *formData = [[AFStreamingMultipartFormData alloc] initWithURLRequest:mutableRequest stringEncoding:NSUTF8StringEncoding];
+        if (parameters) {
+            /*
+             把parameters拼接成`AFQueryStringPair`对象。然后根据取出的key和value处理。
+             */
+            for (AFQueryStringPair *pair in AFQueryStringPairsFromDictionary(parameters)) {
+                NSData *data = nil;
+                //把value处理为NSData类型
+                if ([pair.value isKindOfClass:[NSData class]]) {
+                    data = pair.value;
+                } else if ([pair.value isEqual:[NSNull null]]) {
+                    data = [NSData data];
+                } else {
+                    data = [[pair.value description] dataUsingEncoding:self.stringEncoding];
+                }
+                if (data) {
+                    [formData appendPartWithFormData:data name:[pair.field description]];
+                }
+            }
+        }
+        if (block) {
+            block(formData);
+        }
+        //body具体序列化操作
+        return [formData requestByFinalizingMultipartFormData];
+    }
+
+
+
+    /**
+     通过一个Multipart-Form的request创建一个request。新request的httpBody是`fileURL`指定的文件。
+     并且是通过`HTTPBodyStream`这个属性添加，`HTTPBodyStream`属性的数据会自动添加为httpBody。
+
+     @param request 原request
+     @param fileURL 文件的url
+     @param handler 错误处理
+     @return 处理完成的request
+     */
+    - (NSMutableURLRequest *)requestWithMultipartFormRequest:(NSURLRequest *)request
+                                 writingStreamContentsToFile:(NSURL *)fileURL
+                                           completionHandler:(void (^)(NSError *error))handler
+    {
+        NSParameterAssert(request.HTTPBodyStream);
+        NSParameterAssert([fileURL isFileURL]);
+        //获取`HTTPBodyStream`属性
+        NSInputStream *inputStream = request.HTTPBodyStream;
+        //获取文件的数据流
+        NSOutputStream *outputStream = [[NSOutputStream alloc] initWithURL:fileURL append:NO];
+        __block NSError *error = nil;
+
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            //把读和写的操作加入当前线程的runloop
+            [inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+            [outputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+            //打开读和写数据流
+            [inputStream open];
+            [outputStream open];
+            //循环做读和写操作
+            while ([inputStream hasBytesAvailable] &amp;&amp; [outputStream hasSpaceAvailable]) {
+                uint8_t buffer[1024];
+
+                NSInteger bytesRead = [inputStream read:buffer maxLength:1024];
+                if (inputStream.streamError || bytesRead &lt; 0) {
+                    error = inputStream.streamError;
+                    break;
+                }
+
+                NSInteger bytesWritten = [outputStream write:buffer maxLength:(NSUInteger)bytesRead];
+                if (outputStream.streamError || bytesWritten &lt; 0) {
+                    error = outputStream.streamError;
+                    break;
+                }
+
+                if (bytesRead == 0 &amp;&amp; bytesWritten == 0) {
+                    break;
+                }
+            }
+            //读和写完成。关闭读和写数据流
+            [outputStream close];
+            [inputStream close];
+            //如果有handler，调用handler这个Block
+            if (handler) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    handler(error);
+                });
+            }
+        });
+        //获取一个新的request，新的request的httpBody已经通过`HTTPBodyStream`转换成功
+        NSMutableURLRequest *mutableRequest = [request mutableCopy];
+        mutableRequest.HTTPBodyStream = nil;
+        //返回一个request对象
+        return mutableRequest;
+    }
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/02/20/AFURLRequestSerialization/" data-id="cjurrl6420005ub969tc9m2di" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/03/13/AFURLSessionManager解析/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          AFNetwoking之AFURLSessionManager(二)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/02/13/AFHTTPSessionManager/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">AFNetworking之AFHTTPSessionManager(一)</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/18/指针与结构体/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/03/13/AFURLSessionManager解析/">AFNetwoking之AFURLSessionManager(二)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/20/AFURLRequestSerialization/">AFNetworking之AFURLRequestSerialization(三)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/13/AFHTTPSessionManager/">AFNetworking之AFHTTPSessionManager(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/24/iOS-category不能添加属性探究/">iOS category不能添加属性探究</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
