@@ -1460,7 +1460,7 @@ return NSURLSessionTaskStateCanceling;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/03/13/AFURLSessionManager解析/" data-id="cjurrprvy0006vc96idqk8p4i" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/03/13/AFURLSessionManager解析/" data-id="cjvnhkwrm0007dt96t1oxkm85" class="article-share-link">Share</a>
       
       
     </footer>
@@ -2546,7 +2546,7 @@ userAgent、request属性的KVO观察、手动指定请求头序列化的Block�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/20/AFURLRequestSerialization/" data-id="cjurrprvx0005vc96zqd9087c" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/02/20/AFURLRequestSerialization/" data-id="cjvnhkwrj0006dt96tsbfyehk" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3040,7 +3040,7 @@ AFURLSessionManager里面来解析，故而这里调用父类方法。
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/13/AFHTTPSessionManager/" data-id="cjurrprvt0004vc96hhx50log" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/02/13/AFHTTPSessionManager/" data-id="cjvnhkwrf0005dt96xu7l5xwg" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3100,7 +3100,7 @@ AFURLSessionManager里面来解析，故而这里调用父类方法。
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/" data-id="cjurrprv80000vc96kkuhda72" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/" data-id="cjvnhkwqm0000dt96z5efapza" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3199,7 +3199,290 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/24/Calendar/" data-id="cjurrprvg0002vc96g7sz5hff" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/01/24/Calendar/" data-id="cjvnhkwqz0001dt965g52l60x" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-iOS 事件传递" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/14/iOS 事件传递/" class="article-date">
+  <time datetime="2018-04-13T16:00:00.000Z" itemprop="datePublished">2018-04-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/14/iOS 事件传递/">iOS 事件传递</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="iOS事件传递"><a href="#iOS事件传递" class="headerlink" title=" iOS事件传递 "></a><center> iOS事件传递 </center></h2><h3 id="1-事件响应流程"><a href="#1-事件响应流程" class="headerlink" title="1.事件响应流程"></a>1.事件响应流程</h3><p><img src="https://user-gold-cdn.xitu.io/2019/5/9/16a9c555e50b4073?imageView2/0/w/1280/h/960/ignore-error/1" alt="图片.png"></p>
+<pre><code>完整的触摸事件的传递响应过程为:
+UIApplication -&gt; UIWindow -&gt; 递归找到最合适处理的控件 -&gt; 控件调用touches方法 -&gt;
+判断是否实现touches方法 -&gt; 没有实现默认会将事件传递给上一个响应者 -&gt; 找到上一个响应
+者 -&gt; 找不到方法作废
+
+一句话总结整个过程: 触摸或者点击一个控件,然后这个事件会从上向下(父 -&gt; 子)找到最合适的
+view处理，找到这个view之后看他能不能处理，能就处理,不能就按照事件响应链向上(子 -&gt; 
+父)传递给父控件.
+
+事件的传递和响应的区别:
+事件的传递: 从上到下(父控件 -&gt; 子控件);
+事件的响应: 从下到上(顺着响应链向上传递: 子控件 -&gt; 父控件).
+</code></pre><p>请看下图:</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/737950-fe3f19996c33d4c7.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图片.png"></p>
+<pre><code>情景使用一:
+    点击子控件，让父控件响应事件:(点击绿色view，红色view响应);
+    (1)因为hitTest:withEvent:方法的作用就是控件接收到事件后，判断自己是否能处理事
+        件，判断点在不在自己的坐标系上，然后返回最合适的view。所以，我们可以在
+        hitTest:withEvent:方法里面强制返回父控件为最合适的view.
+
+        #import &quot;GreenView2.h&quot;
+        @implementation GreenView2
+        - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+        {
+            return [self superview]; // return nil; 
+            // 此处返回nil也可以。返回nil就相当于当前的view不是最合适的view
+        }
+        @end
+
+    (2) 让谁响应，就直接重写谁的touchesBegan: withEvent:方法
+        #import &quot;RedView1.h&quot;
+        @implementation RedView1
+        -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+        {
+
+          NSLog(@&quot;-- touchRed touchesBegan&quot;);
+        }
+        @end
+
+情景使用二:
+    点击子控件，父控件和子控件都响应事件;(点击绿色view,绿色view和红色view都响应)
+    分析:
+    事件的响应是顺着响应者链条向上传递的，即从子控件传递给父控件，touch方法默认不处
+    理事件，而是把事件顺着响应者链条传递给上一个响应者。这样我们就可以依托这个原理，
+    让一个事件多个控件响应.
+
+    #import &quot;GreenView2.h&quot;
+    @implementation GreenView2
+    -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+    {
+      NSLog(@&quot;-- touchGreen&quot;);
+      [super touchesBegan:touches withEvent:event];
+    }
+</code></pre><h3 id="2-坐标点转换"><a href="#2-坐标点转换" class="headerlink" title="2.坐标点转换"></a>2.坐标点转换</h3><pre><code>1.坐标系转换convertPoint
+
+// 将像素point由point所在视图转换到目标视图view中，返回在目标视图view中的像素值
+- (CGPoint)convertPoint:(CGPoint)point toView:(UIView *)view;
+
+// 将像素point从view中转换到当前视图中，返回在当前视图中的像素值
+- (CGPoint)convertPoint:(CGPoint)point fromView:(UIView *)view;
+
+// 将rect由rect所在视图转换到目标视图view中，返回在目标视图view中的rect
+- (CGRect)convertRect:(CGRect)rect toView:(UIView *)view;
+
+// 将rect从view中转换到当前视图中，返回在当前视图中的rect
+- (CGRect)convertRect:(CGRect)rect fromView:(UIView *)view;
+</code></pre><p>看图:</p>
+<p><img src="http://cc.cocimg.com/api/uploads/20161206/1480988721246723.jpeg" alt="图片.png"></p>
+<pre><code>blueView和grayView是同一个层级，redView为grayView的子视图，如何判断redView和
+blueView的关系呢（在内部，在外部，还是相交）？
+
+此时就需要进行坐标系转换
+
+官方提供了4个方法(UIView的方法)：
+
+ //点转换
+-(CGPoint)convertPoint:(CGPoint)point toView:(nullable UIView *)view;
+-(CGPoint)convertPoint:(CGPoint)point fromView:(nullable UIView *)view;
+//矩形转换
+-(CGRect)convertRect:(CGRect)rect toView:(nullable UIView *)view;
+-(CGRect)convertRect:(CGRect)rect fromView:(nullable UIView *)view;
+
+获取redView在self.view坐标系中的坐标（以下两种写法等效):
+CGPoint redCenterInView = [self.grayView convertPoint:self.redView.center 
+                           toView:self.view];
+
+ CGPoint redCenterInView = [self.view convertPoint:self.redView.center 
+                            fromView:self.grayView];
+
+使用注意：
+    1.使用convertPoint:toView:时，调用者应为covertPoint的父视图。即调用者应为point
+      的父控件。toView即为需要转换到的视图坐标系，以此视图的左上角为（0，0）点。
+    2.使用convertPoint:fromView:时正好相反，调用者为需要转换到的视图坐标系。fromView
+      为point所在的父控件。
+    3.toView可以为nil。此时相当于toView传入self.view.window.
+    补充：有人问道为什么相对于self.view 和相对于self.view.window 不一样呢？
+          因为在viewDidLoad方法中，self.view.window为nil，测试的时候注意不要直接写在
+         viewDidLoad方法中，写在viewdidAppear中。
+
+************************************************************ 
+还可以这样理解:
+- A(CGPoint)convertPoint:B(CGPoint)point toView:C(nullable UIView *)view; 
+ - A(CGPoint)convertPoint:B(CGPoint)point fromView:C(nullable UIView *)view;
+
+ 第一句代表:
+
+ A区域里面有个坐标B,需要把相对于A的坐标B转换成相对于C的坐标
+
+ 第二句代表:
+
+ 从C区域里面转换坐标B，需要把相对于C的坐标转换成相对于A的坐标
+************************************************************
+
+2.点在范围内的判断
+    方案一： 转换为同一坐标系下后比较x，y值，判断范围;
+    方案二： 利用pointInside方法进行判断;
+    方案一不需介绍，下面说明下方案二的使用;
+
+    使用注意：
+    point必须为调用者的坐标系，即调用者的左上角为（0，0）的坐标系。
+
+    比如确定redView的中心点是否在blueView上：
+
+    //转换为blueView坐标系点
+    CGPoint redCenterInBlueView = [self.grayView  
+    convertPoint:self.redView.center toView:self.blueView];
+
+    BOOL isInside = [self.blueView pointInside:redCenterInBlueView 
+                     withEvent:nil];
+
+    NSLog(@&quot;%d&quot;,isInside);
+    输出结果为1。即点在范围内。
+</code></pre><p><img src="https://user-gold-cdn.xitu.io/2017/11/15/15fbe812a5fdbdba?imageView2/0/w/1280/h/960/ignore-error/1" alt="图片.png">        </p>
+<pre><code>3.hitTest的底层实现:
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+    // 1.如果控件不允许与用用户交互,那么返回nil
+    if (self.userInteractionEnabled == NO || self.alpha &lt;= 0.01 || self.hidden == YES){
+        return nil;
+    }
+    // 2. 如果点击的点在不在当前控件中,返回nil
+    if (![self pointInside:point withEvent:event]){
+        return nil;
+    }
+    // 3.从后往前遍历每一个子控件(如上图:)
+    for(int i = (int)self.subviews.count - 1 ; i &gt;= 0 ;i--){
+        // 3.1获取一个子控件
+        UIView *childView = self.subviews[i];
+        // 3.2当前触摸点的坐标转换为相对于子控件触摸点的坐标
+        CGPoint childP = [self convertPoint:point toView:childView];
+        // 3.3判断是否在在子控件中找到了更合适的子控件(递归循环)
+        UIView *fitView = [childView hitTest:childP withEvent:event];
+        // 3.4如果找到了就返回
+        if (fitView) {
+            return fitView;
+        }
+    }
+    // 4.没找到,表示没有比自己更合适的view,返回自己
+    return self;
+}
+</code></pre><h3 id="3-事件不响应的情况"><a href="#3-事件不响应的情况" class="headerlink" title="3.事件不响应的情况"></a>3.事件不响应的情况</h3><h5 id="3-1-看图"><a href="#3-1-看图" class="headerlink" title="3.1 看图:"></a>3.1 看图:</h5><p><img src="https://upload-images.jianshu.io/upload_images/737950-fe3f19996c33d4c7.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图片.png"></p>
+<h5 id="3-2-看几个view的内部代码"><a href="#3-2-看几个view的内部代码" class="headerlink" title="3.2 看几个view的内部代码"></a>3.2 看几个view的内部代码</h5><p>Redview:</p>
+<pre><code>#pragma mark -- life cycle
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.backgroundColor = [UIColor redColor];
+    }
+    return self;
+}
+
+- (void)touchesBegan:(NSSet&lt;UITouch *&gt; *)touches withEvent:(UIEvent *)event {
+    NSLog(@&quot;touch redView&quot;);
+}
+</code></pre><p>Blueview:</p>
+<pre><code>#pragma mark -- life cycle
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.backgroundColor = [UIColor blueColor];
+    }
+    return self;
+}
+
+- (void)touchesBegan:(NSSet&lt;UITouch *&gt; *)touches withEvent:(UIEvent *)event {
+    NSLog(@&quot;touch blueView&quot;);
+}
+</code></pre><p>Greenview:</p>
+<pre><code>#pragma mark -- life cycle
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.backgroundColor = [UIColor greenColor];
+    }
+    return self;
+}
+
+//- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+//    return [self superview];
+//}
+
+- (void)touchesBegan:(NSSet&lt;UITouch *&gt; *)touches withEvent:(UIEvent *)event {
+    NSLog(@&quot;touch greenView&quot;);
+//    [super touchesBegan:touches withEvent:event];
+}
+</code></pre><p>Yellowview:</p>
+<pre><code>#pragma mark -- life cycle
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.backgroundColor = [UIColor yellowColor];
+    }
+    return self;
+}
+
+- (void)touchesBegan:(NSSet&lt;UITouch *&gt; *)touches withEvent:(UIEvent *)event {
+    NSLog(@&quot;touch yellowView&quot;);
+}
+</code></pre><p>我设置绿色view的alpha = 0.01(基本看不到绿色view了),点击绿色view时,发现Greenview的touchesBegan方法不实现,直接实现父view(Redview)的touchesBegan方法.</p>
+<p>也就是Greenview的hitTest: withEvent:内部不会实现;</p>
+<pre><code>一个典型的响应路线图如：
+
+First Responser -- &gt; The Window -- &gt;The Application -- &gt; App Delegate
+</code></pre><h3 id="4-扩大-缩小view的点击区域"><a href="#4-扩大-缩小view的点击区域" class="headerlink" title="4.扩大/缩小view的点击区域"></a>4.扩大/缩小view的点击区域</h3><pre><code>如重写button的:
+-(BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event;
+
+-(BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+// 当前btn大小
+CGRect btnBounds = self.bounds;
+// 扩大点击区域，想缩小就将-10设为正值
+btnBounds = CGRectInset(btnBounds, -10, -10);
+
+// 若点击的点在新的bounds里，就返回YES
+return CGRectContainsPoint(btnBounds, point);
+}
+
+/**
+ 对CGRectInset的解释
+ CGRectInset(CGRect rect, CGFloat dx, CGFloat dy)作用是将rect坐标按照(dx,dy)进行平
+ 移，对size进行如下变换:
+     新宽度 = 原宽度 - 2*dx;
+     新高度 = 原高度 - 2*dy;
+ dx,dy为正，则为缩小点击范围;
+ dx,dy为负的话，则为扩大范围
+ */
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/14/iOS 事件传递/" data-id="cjvnhkwr10002dt96e7flmgfo" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3537,7 +3820,7 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/01/24/GCD的笔记/" data-id="cjurrprvh0003vc969qe52lse" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/01/24/GCD的笔记/" data-id="cjvnhkwr20003dt96kmfukky7" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3547,9 +3830,9 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
 
 
   
-    <article id="post-指针与结构体" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-指针(一维数组)" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/11/13/指针与结构体/" class="article-date">
+    <a href="/2017/11/13/指针(一维数组)/" class="article-date">
   <time datetime="2017-11-12T16:00:00.000Z" itemprop="datePublished">2017-11-13</time>
 </a>
     
@@ -3561,7 +3844,7 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/11/13/指针与结构体/">C语言指针记录</a>
+      <a class="article-title" href="/2017/11/13/指针(一维数组)/">C语言指针(一维数组)</a>
     </h1>
   
 
@@ -3569,7 +3852,7 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="1-指针"><a href="#1-指针" class="headerlink" title="1.指针"></a>1.指针</h2><pre><code>1.1 栗子:
+        <h2 id="1-指针-一维数组"><a href="#1-指针-一维数组" class="headerlink" title="1.指针(一维数组)"></a>1.指针(一维数组)</h2><pre><code>1.1 栗子:
     {
         int a = 100, b = 10;
         int *pointer_1, *pointer_2;
@@ -3795,11 +4078,95 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
 
     注意:实参数组名代表一个固定的地址，或者说是指针常量，但形参数组名并不是一个固定的地址，
         而是按指针变量处理。
+
+    //  8.8 将数组a中n个整数按相反顺序存放.如:3、7、9、11、0、6、7、5、4、2
+    {
+        void inv(int x[], int n);// 函数声明
+        int i, a[10] = {3,7,9,11,0,6,7,5,4,2};
+        printf(&quot;original array,\n&quot;);
+        for (i = 0; i &lt; 10; i++) {
+            printf(&quot;%d&quot;, a[i]); //  输出交换前的各元素值.
+        }
+
+        inv(a, 10);
+
+        printf(&quot;array has been inverted:\n&quot;);
+
+        for (i = 0; i &lt; 10; i++) {
+            printf(&quot;%d&quot;, a[i]); //  输出交换后的各元素值.
+        }
+
+        printf(&quot;\n&quot;);
+    }
+
+    void inv(int x[], int n) {
+        int temp, i, j, mid = (n - 1) / 2;
+        for (i = 0; i &lt;= mid; i++) {
+            j = n - i - 1;
+            temp = x[i];
+            x[i] = x[j];
+            x[j] = temp;
+        }
+    }
+
+    void inv_point(int * x, int n) {
+        int * p, temp, *i, *j, m = (n - 1) / 2;
+        i = x;
+        j = x + n - 1;
+        p = x + m;
+        for (; i &lt;= p; i++, j--) {
+            temp = *i;
+            *i = *j;
+            *j = temp;
+        }
+    }
+
+    //  8.9 用指针方法对10个整数按由大到小顺序排序.
+    {
+        void sort(int x[], int n);
+        int i, *p, a[10];
+        p = a;
+        printf(&quot;enter 10 integer numbers:&quot;);
+        for (i = 0; i &lt; 10; i++) {
+            scanf(&quot;%d&quot;, p++);
+        }
+
+        p = a;
+
+        for (p = a, i = 0; i &lt; 10; i++) {
+            printf(&quot;%d&quot;, *p);
+            p++;
+        }
+        printf(&quot;\n&quot;);
+    }
+
+    ****选择排序法****
+    void sort(int x[], int n) {
+        int i,j,k,t;
+        for (i = 0; i &lt; n - 1; i++) {
+            k = i;
+
+            for (j = i + 1; j &lt; n; j++) {
+                if (x[j] &gt; x[i]) {
+                    k = j;
+
+                    if (k != i) {
+                        t = x[i];
+                        x[i] = x[k];
+                        x[k] = t;
+                    }
+                }
+            }
+        }
+    }
+
+
+2.5 通过指针引用多维数组
 </code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/11/13/指针与结构体/" data-id="cjurrprvb0001vc96uo1imwvq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/11/13/指针(一维数组)/" data-id="cjvnhkwr30004dt96b0my850u" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3827,7 +4194,7 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li></ul>
     </div>
   </div>
 
