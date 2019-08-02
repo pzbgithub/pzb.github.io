@@ -1460,7 +1460,7 @@ return NSURLSessionTaskStateCanceling;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/03/13/AFURLSessionManager解析/" data-id="cjvni12gf0007hv96vrnt9cjj" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/03/13/AFURLSessionManager解析/" data-id="cjytvy0gw0008xn96g9lfg48c" class="article-share-link">Share</a>
       
       
     </footer>
@@ -2546,7 +2546,7 @@ userAgent、request属性的KVO观察、手动指定请求头序列化的Block�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/20/AFURLRequestSerialization/" data-id="cjvni12gd0006hv966dbbyk0f" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/02/20/AFURLRequestSerialization/" data-id="cjytvy0gu0007xn969s789pog" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3040,7 +3040,7 @@ AFURLSessionManager里面来解析，故而这里调用父类方法。
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/02/13/AFHTTPSessionManager/" data-id="cjvni12ga0005hv96uvlb394n" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/02/13/AFHTTPSessionManager/" data-id="cjytvy0gd0006xn96pykqy416" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3100,7 +3100,7 @@ AFURLSessionManager里面来解析，故而这里调用父类方法。
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/" data-id="cjvni12fv0000hv964y6pwyxv" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/01/24/iOS-category不能添加属性探究/" data-id="cjytvy0fu0001xn9629iyfcb0" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3199,7 +3199,73 @@ NSWeekdayCalendarUnit = 1 - 7&lt;br&gt;
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2019/01/24/Calendar/" data-id="cjvni12g30001hv96z8uaocup" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2019/01/24/Calendar/" data-id="cjytvy0g30002xn9670m4iarp" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-iOS-图片缓存设计" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/14/iOS-图片缓存设计/" class="article-date">
+  <time datetime="2018-04-13T16:00:00.000Z" itemprop="datePublished">2018-04-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/14/iOS-图片缓存设计/">iOS 事件传递</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_8fbb59c10fdccb4a84cde7b124d06093.png" alt="图片.png"></p>
+<h2 id="iOS-图片缓存设计思路分析"><a href="#iOS-图片缓存设计思路分析" class="headerlink" title=" iOS-图片缓存设计思路分析 "></a><center> iOS-图片缓存设计思路分析 </center></h2><h4 id="1-UIImageView-AFNetworking"><a href="#1-UIImageView-AFNetworking" class="headerlink" title="1.UIImageView+AFNetworking"></a>1.UIImageView+AFNetworking</h4><pre><code>1.        setImageWithURL:(NSURL *)url
+                            |
+                            |
+        setImageWithURL:(NSURL *)url
+   placeholderImage:(UIImage *)placeholderImage
+   [ 该方法实现:
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+         [request addValue:@&quot;image/*&quot; forHTTPHeaderField:@&quot;Accept&quot;];
+
+        [self setImageWithURLRequest:request placeholderImage:placeholderImage success:nil 
+          failure:nil];
+   ]
+                            |
+                            |
+        setImageWithURLRequest:(NSURLRequest *)urlRequest
+          placeholderImage:(UIImage *)placeholderImage
+                   success:(void (^)(NSURLRequest *request, NSHTTPURLResponse * _Nullable response, UIImage *image))success
+                   failure:(void (^)(NSURLRequest *request, NSHTTPURLResponse * _Nullable response, NSError *error))failure
+
+                            |
+                          \|/
+
+
+2. 判断当前urlRequest是否有效([urlRequest URL]是否为nil);
+3. nil: 设置placeholderImage,并调用failure回调;
+4. non-nil: 判断当前activeImageDownloadReceipt中的urlRequest和当前urlReuqest是否相同请求;
+   相同: 直接return停止当前urlRequest的请求;
+   不同: 则取消当前activeImageDownloadReceipt中的urlRequest;
+5. 
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/14/iOS-图片缓存设计/" data-id="cjytvy0fq0000xn96cyscelwk" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3482,7 +3548,7 @@ return CGRectContainsPoint(btnBounds, point);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/04/14/iOS 事件传递/" data-id="cjvni12g60003hv96xku7hrnu" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/04/14/iOS 事件传递/" data-id="cjytvy0g40003xn96jjmo3hfi" class="article-share-link">Share</a>
       
       
     </footer>
@@ -3820,7 +3886,7 @@ return CGRectContainsPoint(btnBounds, point);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/01/24/GCD的笔记/" data-id="cjvni12g50002hv96459oggsu" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2018/01/24/GCD的笔记/" data-id="cjytvy0g50004xn96tt3v6eon" class="article-share-link">Share</a>
       
       
     </footer>
@@ -4166,7 +4232,7 @@ return CGRectContainsPoint(btnBounds, point);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/11/13/指针(一维数组)/" data-id="cjvni12g70004hv96atkz2sys" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/11/13/指针(一维数组)/" data-id="cjytvy0g60005xn9648mr59cq" class="article-share-link">Share</a>
       
       
     </footer>

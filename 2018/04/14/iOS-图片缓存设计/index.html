@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>iOS 事件传递 | iOS知识积累</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="iOS-图片缓存设计思路分析 1.UIImageView+AFNetworking1.        setImageWithURL:(NSURL *)url                             |                             |         setImageWithURL:(NSURL *)url    placeholderImage:(">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 事件传递">
+<meta property="og:url" content="http://yoursite.com/2018/04/14/iOS-图片缓存设计/index.html">
+<meta property="og:site_name" content="iOS知识积累">
+<meta property="og:description" content="iOS-图片缓存设计思路分析 1.UIImageView+AFNetworking1.        setImageWithURL:(NSURL *)url                             |                             |         setImageWithURL:(NSURL *)url    placeholderImage:(">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_8fbb59c10fdccb4a84cde7b124d06093.png">
+<meta property="og:updated_time" content="2019-05-15T06:15:48.602Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS 事件传递">
+<meta name="twitter:description" content="iOS-图片缓存设计思路分析 1.UIImageView+AFNetworking1.        setImageWithURL:(NSURL *)url                             |                             |         setImageWithURL:(NSURL *)url    placeholderImage:(">
+<meta name="twitter:image" content="http://192.168.5.79:4000/static/upload/20190102/upload_8fbb59c10fdccb4a84cde7b124d06093.png">
+  
+    <link rel="alternate" href="/atom.xml" title="iOS知识积累" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">iOS知识积累</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">马努吉诺比利</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-iOS-图片缓存设计" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/14/iOS-图片缓存设计/" class="article-date">
+  <time datetime="2018-04-13T16:00:00.000Z" itemprop="datePublished">2018-04-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      iOS 事件传递
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://192.168.5.79:4000/static/upload/20190102/upload_8fbb59c10fdccb4a84cde7b124d06093.png" alt="图片.png"></p>
+<h2 id="iOS-图片缓存设计思路分析"><a href="#iOS-图片缓存设计思路分析" class="headerlink" title=" iOS-图片缓存设计思路分析 "></a><center> iOS-图片缓存设计思路分析 </center></h2><h4 id="1-UIImageView-AFNetworking"><a href="#1-UIImageView-AFNetworking" class="headerlink" title="1.UIImageView+AFNetworking"></a>1.UIImageView+AFNetworking</h4><pre><code>1.        setImageWithURL:(NSURL *)url
+                            |
+                            |
+        setImageWithURL:(NSURL *)url
+   placeholderImage:(UIImage *)placeholderImage
+   [ 该方法实现:
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+         [request addValue:@&quot;image/*&quot; forHTTPHeaderField:@&quot;Accept&quot;];
+
+        [self setImageWithURLRequest:request placeholderImage:placeholderImage success:nil 
+          failure:nil];
+   ]
+                            |
+                            |
+        setImageWithURLRequest:(NSURLRequest *)urlRequest
+          placeholderImage:(UIImage *)placeholderImage
+                   success:(void (^)(NSURLRequest *request, NSHTTPURLResponse * _Nullable response, UIImage *image))success
+                   failure:(void (^)(NSURLRequest *request, NSHTTPURLResponse * _Nullable response, NSError *error))failure
+
+                            |
+                          \|/
+
+
+2. 判断当前urlRequest是否有效([urlRequest URL]是否为nil);
+3. nil: 设置placeholderImage,并调用failure回调;
+4. non-nil: 判断当前activeImageDownloadReceipt中的urlRequest和当前urlReuqest是否相同请求;
+   相同: 直接return停止当前urlRequest的请求;
+   不同: 则取消当前activeImageDownloadReceipt中的urlRequest;
+5. 
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/04/14/iOS-图片缓存设计/" data-id="cjytvy0fq0000xn96cyscelwk" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/01/24/Calendar/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Calendar相关计算
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/04/14/iOS 事件传递/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">iOS 事件传递</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">February 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">April 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/03/13/AFURLSessionManager解析/">AFNetwoking之AFURLSessionManager(二)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/20/AFURLRequestSerialization/">AFNetworking之AFURLRequestSerialization(三)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/02/13/AFHTTPSessionManager/">AFNetworking之AFHTTPSessionManager(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/24/iOS-category不能添加属性探究/">iOS category不能添加属性探究</a>
+          </li>
+        
+          <li>
+            <a href="/2019/01/24/Calendar/">Calendar相关计算</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 彭章博<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
